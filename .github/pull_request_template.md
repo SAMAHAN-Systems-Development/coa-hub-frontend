@@ -1,5 +1,5 @@
 ### Issue ticket number and link
-<!-- Follow the format "Resolves TICKET_NUMBER - [TICKET_NAME](https://huly.app/workbench/adto/tracker/link-to-ticket)" -->
+<!-- Follow the format "Resolves #ISSUE_NUMBER" -->
 
 # Features
 <!-- Brief description of every new single proposed changes. Preferably in bulleted form -->
