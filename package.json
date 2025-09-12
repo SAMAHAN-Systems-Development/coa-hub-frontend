@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write \"app/**/*\" \"components/**/*\" \"lib/**/*\"",
-    "format:check": "prettier --check \"app/**/*\" \"components/**/*\" \"lib/**/*\""
+    "format": "prettier --write \"src/**/*\" \"components/**/*\" \"lib/**/*\"",
+    "format:check": "prettier --check \"src/**/*\" \"components/**/*\" \"lib/**/*\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.0",
