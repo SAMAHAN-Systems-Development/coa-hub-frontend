@@ -21,22 +21,22 @@ const sizeConfig = {
     title: "text-lg",
     description: "text-sm",
     container: "max-w-sm",
-    gap: "gap-3"
+    gap: "gap-3",
   },
   md: {
     icon: "w-16 h-16",
     title: "text-xl",
     description: "text-base",
     container: "max-w-md",
-    gap: "gap-4"
+    gap: "gap-4",
   },
   lg: {
     icon: "w-20 h-20",
     title: "text-2xl",
     description: "text-lg",
     container: "max-w-lg",
-    gap: "gap-6"
-  }
+    gap: "gap-6",
+  },
 };
 
 export const EmptyState = ({
@@ -46,28 +46,34 @@ export const EmptyState = ({
   // actionLabel,   // for action (if needed)
   // onAction,      // for action (if needed)
   className,
-  size = "md"
+  size = "md",
 }: EmptyStateProps) => {
   const config = sizeConfig[size];
-  
+
   // Default icon is Search, but can be overridden
   const displayIcon = icon || <Search className={cn(config.icon)} />;
 
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center text-center p-8 min-h-[400px]",
-      config.container,
-      config.gap,
-      className
-    )}>
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center text-center p-8 min-h-[400px]",
+        config.container,
+        config.gap,
+        className
+      )}
+    >
       {/* Icon */}
-      <div className={cn(
-        "flex items-center justify-center rounded-full bg-muted mb-2",
-        config.icon === "w-12 h-12" ? "p-3" : config.icon === "w-16 h-16" ? "p-4" : "p-5"
-      )}>
-        <div className="text-muted-foreground">
-          {displayIcon}
-        </div>
+      <div
+        className={cn(
+          "flex items-center justify-center rounded-full bg-muted mb-2",
+          config.icon === "w-12 h-12"
+            ? "p-3"
+            : config.icon === "w-16 h-16"
+              ? "p-4"
+              : "p-5"
+        )}
+      >
+        <div className="text-muted-foreground">{displayIcon}</div>
       </div>
 
       {/* Title */}
