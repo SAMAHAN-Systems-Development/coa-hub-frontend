@@ -7,7 +7,6 @@ export interface ContentContainerProps {
 
 /**
  * ContentContainer
- * - Adds vertical spacing between sections
  * - Responsive padding for main content
  */
 export const ContentContainer: React.FC<ContentContainerProps> = ({
