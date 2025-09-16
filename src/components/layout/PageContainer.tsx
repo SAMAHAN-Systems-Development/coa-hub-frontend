@@ -13,9 +13,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   children,
   className = "",
 }) => (
-  <div
-    className={`mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 w-full min-h-screen flex flex-col gap-8 ${className}`}
-  >
+  <div className={`w-full min-h-screen flex flex-col bg-white${className}`}>
     {children}
   </div>
 );

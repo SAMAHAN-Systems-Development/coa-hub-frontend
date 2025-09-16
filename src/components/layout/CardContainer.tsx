@@ -19,7 +19,7 @@ export const CardContainer: React.FC<CardContainerProps> = ({
   imageAlt = "",
 }) => (
   <div
-    className={`bg-white rounded-md flex flex-col items-center p-3 w-full max-w-[299px] min-h-[400px] mx-auto ${className}`}
+    className={`rounded-md flex flex-col items-center p-3 w-full max-w-[299px] min-h-[400px] mx-auto ${className}`}
   >
     {imageSrc ? (
       <Image
@@ -27,7 +27,7 @@ export const CardContainer: React.FC<CardContainerProps> = ({
         alt={imageAlt}
         width={299}
         height={382}
-        className="w-full h-[382px] shadow-2xl rounded-sm object-cover mb-2 border border-gray-300 bg-gray-100"
+        className="w-full h-[382px] shadow-2xl rounded-sm object-cover mb-2"
       />
     ) : (
       <div className="w-full h-[382px] rounded-sm bg-gray-100 border border-gray-300 mb-2 shadow-2xl" />
