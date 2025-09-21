@@ -2,10 +2,10 @@
 
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 import { CheckCircle2, XCircle, Info, AlertTriangle } from "lucide-react";
 
 export type ToastVariant = "success" | "error" | "info" | "warning";
-export type ToastSize = "sm" | "md" | "lg" | "xl";
 export type ToastPosition =
   | "top-left"
   | "top-center"
@@ -14,21 +14,48 @@ export type ToastPosition =
   | "bottom-center"
   | "bottom-right";
 
-export interface ToastOptions {
-  title?: string;
-  description?: string;
-  duration?: number;
-  size?: ToastSize;
-  position?: ToastPosition;
-}
+const containerVariants = cva("flex items-center gap-3 w-full", {
+  variants: {
+    size: {
+      base: "text-xs p-2", // <640
+      sm: "text-xs p-3", // ≥640
+      md: "text-sm p-3", // ≥768
+      lg: "text-sm p-4", // ≥1024
+      xl: "text-md p-4", // ≥1280
+      "2xl": "text-base p-5", // ≥1536  extra
+    },
+  },
+  defaultVariants: { size: "base" },
+});
 
-// size configuration
-const sizeMap: Record<ToastSize, string> = {
-  sm: "text-xs p-2",
-  md: "text-sm p-3",
-  lg: "text-base p-4",
-  xl: "text-lg p-5",
-};
+const iconVariants = cva("shrink-0", {
+  variants: {
+    size: {
+      base: "h-5 w-5", // <640
+      sm: "h-6 w-6", // ≥640
+      md: "h-6 w-6", // ≥768
+      lg: "h-7 w-7", // ≥1024
+      xl: "h-7 w-7", // ≥1280
+      "2xl": "h-8 w-8", // ≥1536  extra
+    },
+  },
+  defaultVariants: { size: "base" },
+});
+
+export type ToastSize = NonNullable<
+  VariantProps<typeof containerVariants>["size"]
+>;
+
+function getResponsiveSize(): ToastSize {
+  if (typeof window === "undefined") return "base";
+  const w = window.innerWidth;
+  if (w >= 1536) return "2xl"; // extra
+  if (w >= 1280) return "xl";
+  if (w >= 1024) return "lg";
+  if (w >= 768) return "md";
+  if (w >= 640) return "sm";
+  return "base";
+}
 
 // variants configuration
 const variantConfig: Record<
@@ -41,21 +68,31 @@ const variantConfig: Record<
   warning: { icon: AlertTriangle, color: "text-amber-500" },
 };
 
+export interface ToastOptions {
+  title?: string;
+  description?: string;
+  duration?: number;
+  size?: ToastSize;
+  position?: ToastPosition;
+}
+
 function showToast(variant: ToastVariant, opts: ToastOptions) {
   // default values
   const {
     title,
     description,
     duration = 4000,
-    size = "md",
+    size,
     position = "bottom-right",
   } = opts;
+
+  const sizeKey = size ?? getResponsiveSize();
   const { icon: Icon, color } = variantConfig[variant];
 
   return toast(
-    <div className={cn("flex items-center gap-3", sizeMap[size])}>
+    <div className={cn(containerVariants({ size: sizeKey }))}>
       <div className="flex items-center">
-        <Icon className={cn("h-10 w-10 shrink-0", color)} />
+        <Icon className={cn(iconVariants({ size: sizeKey }), color)} />
       </div>
       <div className="flex flex-col">
         {title && <div className="font-medium">{title}</div>}
