@@ -61,7 +61,7 @@ const Navbar = () => {
     >
       <div className="absolute inset-0 bg-white/70 pointer-events-none"></div>
       <div className="relative max-w-7xl mx-auto flex items-center px-6 py-8">
-        {/* Logo */}
+        {/* logo */}
         <div className="flex items-center gap-4 flex-shrink-0">
           <img
             src="assets/images/logo-dark.png"
