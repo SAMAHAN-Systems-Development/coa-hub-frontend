@@ -6,8 +6,8 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Spacer } from "@/components/layout/Spacer";
 import { SharedButton } from "@/components/shared/SharedButton";
 import ActionModal from "@/components/features/action_modal";
-import CreateNewTemplateModal from "@/components/features/template/create_new_template";
-import EditTemplateModal from "@/components/features/template/edit_template_modal";
+import CreateNewTemplateModal from "@/components/features/templates_page/create_new_template";
+import EditTemplateModal from "@/components/features/templates_page/edit_template_modal";
 import { Pencil } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
 
