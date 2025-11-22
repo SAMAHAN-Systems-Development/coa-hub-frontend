@@ -113,7 +113,7 @@ export default function AboutUs() {
 
         {/* third section */}
         <ContentContainer>
-          <HeaderContainer title={"CONTACT"} />
+          <HeaderContainer title={"CONTACT"} center />
           <SectionContainer card>
             {contactData.map((item, index) => (
               <HeaderContainer
@@ -126,7 +126,6 @@ export default function AboutUs() {
           </SectionContainer>
         </ContentContainer>
       </PageContainer>
-      <div>About Us</div>
     </>
   );
 }
