@@ -12,6 +12,11 @@ import { format } from "date-fns";
 import ActionModal from "@/components/features/action_modal";
 import CreateNewDeadlineModal from "@/components/features/deadlines_page/create_new_deadline";
 import EditDeadlineModal from "@/components/features/deadlines_page/edit_deadline_modal";
+import { useDeadlinesQuery } from "@/lib/api/queries/use-deadlines";
+import { useCreateDeadlineMutation } from "@/lib/api/mutations/deadlines/createDeadline.mutation";
+import { useUpdateDeadlineMutation } from "@/lib/api/mutations/deadlines/updateDeadline.mutation";
+import { useDeleteDeadlineMutation } from "@/lib/api/mutations/deadlines/deleteDeadline.mutation";
+
 
 interface DeadlineItem {
     id: string;
@@ -27,47 +32,96 @@ export default function DeadlinesPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
 
-    const [rows, setRows] = useState<DeadlineItem[]>([
-        { id: "1", title: "Raw File:", dueDate: "2025-11-14" },
-        { id: "2", title: "Revisions:", dueDate: "2025-11-14" },
-        { id: "3", title: "Cash Count:", dueDate: "2025-11-14" },
-    ]);
+    // const [rows, setRows] = useState<DeadlineItem[]>([
+    //     { id: "1", title: "Raw File:", dueDate: "2025-11-14" },
+    //     { id: "2", title: "Revisions:", dueDate: "2025-11-14" },
+    //     { id: "3", title: "Cash Count:", dueDate: "2025-11-14" },
+    // ]);
+
+    const { data: rows, isLoading, error } = useDeadlinesQuery();
+    if (isLoading) return <p>Loading deadlines...</p>;
+    if (error) return <p>Failed to load deadlines.</p>;
+
+    const createDeadline = useCreateDeadlineMutation();
+    const updateDeadline = useUpdateDeadlineMutation();
+    const deleteDeadline = useDeleteDeadlineMutation();
 
     const handleSaveDeadline = (data: { title: string; dueDate: Date }) => {
-        const newRow = {
-            id: String(Date.now()),
-            title: data.title,
-            dueDate: format(data.dueDate, "yyyy-MM-dd"), // ← FIXED
-        };
-
-        setRows(prev => [...prev, newRow]);
-        setShowDialog(false);
+        createDeadline.mutate(
+            {
+                title: data.title,
+                dueDate: format(data.dueDate, "yyyy-MM-dd"),
+            },
+            {
+                onSuccess: () => {
+                    setShowDialog(false);
+                },
+            }
+        );
     };
 
     const handleUpdateDeadline = (updated: { id: string; title: string; dueDate: Date }) => {
-        setRows(prev =>
-            prev.map(row =>
-                row.id === updated.id
-                    ? {
-                        ...row,
-                        title: updated.title,
-                        dueDate: format(updated.dueDate, "yyyy-MM-dd"), // ← FIXED
-                    }
-                    : row
-            )
+        updateDeadline.mutate(
+            {
+                id: updated.id,
+                title: updated.title,
+                dueDate: format(updated.dueDate, "yyyy-MM-dd"),
+            },
+            {
+                onSuccess: () => {
+                    setEditModalOpen(false);
+                    setSelectedRow(null);
+                },
+            }
         );
-
-        setEditModalOpen(false);
-        setSelectedRow(null);
     };
 
     const handleDelete = () => {
         if (!selectedRow) return;
 
-        setRows((prev) => prev.filter((r) => r.id !== selectedRow.id));
-        setDeleteModalOpen(false);
-        setSelectedRow(null);
+        deleteDeadline.mutate(selectedRow.id, {
+            onSuccess: () => {
+                setDeleteModalOpen(false);
+                setSelectedRow(null);
+            },
+        });
     };
+
+    // const handleSaveDeadline = (data: { title: string; dueDate: Date }) => {
+    //     const newRow = {
+    //         id: String(Date.now()),
+    //         title: data.title,
+    //         dueDate: format(data.dueDate, "yyyy-MM-dd"), // ← FIXED
+    //     };
+
+    //     setRows(prev => [...prev, newRow]);
+    //     setShowDialog(false);
+    // };
+
+    // const handleUpdateDeadline = (updated: { id: string; title: string; dueDate: Date }) => {
+    //     setRows(prev =>
+    //         prev.map(row =>
+    //             row.id === updated.id
+    //                 ? {
+    //                     ...row,
+    //                     title: updated.title,
+    //                     dueDate: format(updated.dueDate, "yyyy-MM-dd"), // ← FIXED
+    //                 }
+    //                 : row
+    //         )
+    //     );
+
+    //     setEditModalOpen(false);
+    //     setSelectedRow(null);
+    // };
+
+    // const handleDelete = () => {
+    //     if (!selectedRow) return;
+
+    //     setRows((prev) => prev.filter((r) => r.id !== selectedRow.id));
+    //     setDeleteModalOpen(false);
+    //     setSelectedRow(null);
+    // };
 
     return (
         <div>
@@ -120,7 +174,7 @@ export default function DeadlinesPage() {
 
                             {/* BODY */}
                             <TableBody>
-                            {rows.map((row, index) => (
+                            {rows?.map((row, index) => (
                                 <TableRow key={index} className="border border-[#c8c8c8] hover:bg-transparent">
                                 
                                 {/* LABEL COLUMN */}

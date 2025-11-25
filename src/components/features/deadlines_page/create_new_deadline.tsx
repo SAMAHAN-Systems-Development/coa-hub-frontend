@@ -173,6 +173,7 @@ export default function CreateNewDeadlineModal({
                             size="lg"
                             rounded="lg"
                             tone="glass"
+                            disabled={!title || !dueDate}
                             className="h-11 !px-8 !text-sm sm:!px-12 sm:!text-base md:min-w-[130px] md:!text-base"
                         >
                             Save
