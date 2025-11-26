@@ -1,6 +1,9 @@
 import type React from "react";
 import { Montserrat, Bebas_Neue } from "next/font/google";
 import "./globals.css";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { SessionProvider } from "@/providers/SessionProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -24,7 +27,14 @@ export default function RootLayout({
       lang="en"
       className={`${montserrat.variable} ${bebasNeue.variable} antialiased`}
     >
-      <body>{children}</body>
+      <body>
+        <SessionProvider>
+          <QueryProvider>
+            {children}
+            <Toaster />
+          </QueryProvider>
+        </SessionProvider>
+      </body>
     </html>
   );
 }
