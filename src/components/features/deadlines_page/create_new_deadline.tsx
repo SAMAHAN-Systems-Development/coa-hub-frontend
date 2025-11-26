@@ -12,7 +12,7 @@ import { CalendarIcon } from "lucide-react"
 interface CreateNewDeadlineProps {
     open: boolean;
     onClose: () => void;
-    onSave: (data: { title: string; dueDate: Date }) => void;
+    onSave: (data: { name: string; dueDate: Date }) => void;
 }
 
 export default function CreateNewDeadlineModal({
@@ -20,12 +20,12 @@ export default function CreateNewDeadlineModal({
     onClose,
     onSave,
 }: CreateNewDeadlineProps) {
-    const [title, setTitle] = useState("");
+    const [name, setName] = useState("");
     const [dueDate, setDueDate] = useState<Date | null>(null)
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     function handleSaveClick() {
-        if (!title  || !dueDate) return;
+        if (!name  || !dueDate) return;
         setConfirmOpen(true);
     }
 
@@ -33,7 +33,7 @@ export default function CreateNewDeadlineModal({
         if (!dueDate) return;
 
         onSave({
-            title,
+            name,
             dueDate, // already a Date object
         });
 
@@ -43,7 +43,7 @@ export default function CreateNewDeadlineModal({
     }
 
     function resetForm() {
-        setTitle("");
+        setName("");
         setDueDate(null);
     }
 
@@ -91,8 +91,8 @@ export default function CreateNewDeadlineModal({
 
                         <Input
                             placeholder="Add Subject"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             className="
                             bg-[#E6E9EE] 
                             text-gray-700 text-xs sm:text-sm md:text-xl 
@@ -173,7 +173,7 @@ export default function CreateNewDeadlineModal({
                             size="lg"
                             rounded="lg"
                             tone="glass"
-                            disabled={!title || !dueDate}
+                            disabled={!name || !dueDate}
                             className="h-11 !px-8 !text-sm sm:!px-12 sm:!text-base md:min-w-[130px] md:!text-base"
                         >
                             Save

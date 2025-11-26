@@ -16,10 +16,10 @@ interface EditDeadlineModalProps {
     onClose: () => void;
     deadline: {
         id: string;
-        title: string;
+        name: string;
         dueDate: Date;
     } | null;
-    onUpdate: (updated: { id: string; title: string; dueDate: Date }) => void;
+    onUpdate: (updated: { id: string; name: string; dueDate: Date }) => void;
 }
 
 export default function EditDeadlineModal({
@@ -29,14 +29,14 @@ export default function EditDeadlineModal({
     onUpdate,
 }: EditDeadlineModalProps) {
     
-    const [title, setTitle] = useState("");
+    const [name, setName] = useState("");
     const [dueDate, setDueDate] = useState<Date | null>(null);
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     // Load selected deadline info when modal opens
     useEffect(() => {
         if (deadline) {
-            setTitle(deadline.title);
+            setName(deadline.name);
             setDueDate(deadline.dueDate);
         }
     }, [deadline, open]);
@@ -52,7 +52,7 @@ export default function EditDeadlineModal({
         if (!deadline || !dueDate) return;
         onUpdate({
             id: deadline.id,
-            title,
+            name,
             dueDate,
         });
 
@@ -89,8 +89,8 @@ export default function EditDeadlineModal({
 
                             <Input
                                 placeholder="Add Subject"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className="bg-[#E6E9EE] 
                                 text-gray-700 text-xs sm:text-sm md:text-xl 
                                 placeholder:text-gray-500 

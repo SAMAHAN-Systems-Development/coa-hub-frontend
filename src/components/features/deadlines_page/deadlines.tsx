@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ContentContainer } from "@/components/layout/ContentContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Spacer } from "@/components/layout/Spacer";
@@ -13,16 +13,9 @@ import ActionModal from "@/components/features/action_modal";
 import CreateNewDeadlineModal from "@/components/features/deadlines_page/create_new_deadline";
 import EditDeadlineModal from "@/components/features/deadlines_page/edit_deadline_modal";
 import { useDeadlinesQuery } from "@/lib/api/queries/use-deadlines";
-import { useCreateDeadlineMutation } from "@/lib/api/mutations/deadlines/createDeadline.mutation";
-import { useUpdateDeadlineMutation } from "@/lib/api/mutations/deadlines/updateDeadline.mutation";
-import { useDeleteDeadlineMutation } from "@/lib/api/mutations/deadlines/deleteDeadline.mutation";
-
-
-interface DeadlineItem {
-    id: string;
-    title: string;
-    dueDate: string;
-}
+import { useCreateDeadlineMutation, useUpdateDeadlineMutation, useDeleteDeadlineMutation } from "@/lib/api/mutations/deadline.mutation";
+import { SkeletonCard } from "@/components/shared/loading-skeleton";
+import { toastError, toastSuccess } from "@/components/shared/toast";
 
 export default function DeadlinesPage() {
 
@@ -32,96 +25,100 @@ export default function DeadlinesPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
 
-    // const [rows, setRows] = useState<DeadlineItem[]>([
-    //     { id: "1", title: "Raw File:", dueDate: "2025-11-14" },
-    //     { id: "2", title: "Revisions:", dueDate: "2025-11-14" },
-    //     { id: "3", title: "Cash Count:", dueDate: "2025-11-14" },
-    // ]);
-
     const { data: rows, isLoading, error } = useDeadlinesQuery();
-    if (isLoading) return <p>Loading deadlines...</p>;
-    if (error) return <p>Failed to load deadlines.</p>;
-
     const createDeadline = useCreateDeadlineMutation();
-    const updateDeadline = useUpdateDeadlineMutation();
-    const deleteDeadline = useDeleteDeadlineMutation();
+    const updateDeadline = useUpdateDeadlineMutation(selectedRow?.id);
+    const deleteDeadline = useDeleteDeadlineMutation(selectedRow?.id);
 
-    const handleSaveDeadline = (data: { title: string; dueDate: Date }) => {
-        createDeadline.mutate(
-            {
-                title: data.title,
-                dueDate: format(data.dueDate, "yyyy-MM-dd"),
-            },
-            {
-                onSuccess: () => {
-                    setShowDialog(false);
-                },
-            }
+    useEffect(() => {
+        if (error) {
+            toastError({
+                title: "Failed to load deadlines",
+                description: "Please check your connection and try again.",
+            });
+        }
+    }, [error]);
+
+    if (isLoading) {
+        return (
+            <ContentContainer>
+                <SectionContainer>
+                    {/* Header skeleton */}
+                    <SkeletonCard size="lg" variant="text-only" className="mb-6" />
+
+                    {/* Table skeleton */}
+                    <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] mt-8">
+                        <SkeletonCard size="md" lines={4} />
+                    </div>
+                </SectionContainer>
+            </ContentContainer>
         );
+    }
+
+    const handleSaveDeadline = async (data: { name: string; dueDate: Date }) => {
+        try {
+            await createDeadline.mutateAsync({
+                name: data.name,
+                dueDate: data.dueDate.toISOString(),
+            });
+            toastSuccess({
+                title: "Deadline created",
+                description: "Your new deadline has been saved.",
+            });
+            setShowDialog(false);
+            } catch (err) {
+            console.error("Failed to create deadline:", err);
+            toastError({
+                title: "Failed to create deadline",
+                description: "Please try again.",
+            });
+        }
     };
 
-    const handleUpdateDeadline = (updated: { id: string; title: string; dueDate: Date }) => {
-        updateDeadline.mutate(
-            {
-                id: updated.id,
-                title: updated.title,
-                dueDate: format(updated.dueDate, "yyyy-MM-dd"),
-            },
-            {
-                onSuccess: () => {
-                    setEditModalOpen(false);
-                    setSelectedRow(null);
-                },
-            }
-        );
-    };
-
-    const handleDelete = () => {
+    const handleUpdateDeadline = async (data: { name: string; dueDate: Date }) => {
         if (!selectedRow) return;
 
-        deleteDeadline.mutate(selectedRow.id, {
-            onSuccess: () => {
-                setDeleteModalOpen(false);
-                setSelectedRow(null);
+        try {
+        await updateDeadline.mutateAsync({
+            id: selectedRow.id,
+            dto: {
+            name: data.name,
+            dueDate: data.dueDate.toISOString(),
             },
         });
+        toastSuccess({
+            title: "Deadline updated",
+            description: "Changes have been saved.",
+        });
+        setEditModalOpen(false);
+        } catch (err) {
+        console.error("Failed to update deadline:", err);
+        toastError({
+            title: "Failed to update deadline",
+            description: "Please try again.",
+        });
+        }
     };
 
-    // const handleSaveDeadline = (data: { title: string; dueDate: Date }) => {
-    //     const newRow = {
-    //         id: String(Date.now()),
-    //         title: data.title,
-    //         dueDate: format(data.dueDate, "yyyy-MM-dd"), // ← FIXED
-    //     };
+    const handleDelete = async () => {
+        if (!selectedRow) return;
 
-    //     setRows(prev => [...prev, newRow]);
-    //     setShowDialog(false);
-    // };
-
-    // const handleUpdateDeadline = (updated: { id: string; title: string; dueDate: Date }) => {
-    //     setRows(prev =>
-    //         prev.map(row =>
-    //             row.id === updated.id
-    //                 ? {
-    //                     ...row,
-    //                     title: updated.title,
-    //                     dueDate: format(updated.dueDate, "yyyy-MM-dd"), // ← FIXED
-    //                 }
-    //                 : row
-    //         )
-    //     );
-
-    //     setEditModalOpen(false);
-    //     setSelectedRow(null);
-    // };
-
-    // const handleDelete = () => {
-    //     if (!selectedRow) return;
-
-    //     setRows((prev) => prev.filter((r) => r.id !== selectedRow.id));
-    //     setDeleteModalOpen(false);
-    //     setSelectedRow(null);
-    // };
+        try {
+        await deleteDeadline.mutateAsync(selectedRow.id);
+        toastSuccess({
+            title: "Deadline deleted",
+            description: "The deadline has been removed.",
+        });
+        setDeleteModalOpen(false);
+        setSelectedRow(null);
+        } catch (err) {
+        console.error("Failed to delete deadline:", err);
+        toastError({
+            title: "Failed to delete deadline",
+            description: "Please try again.",
+        });
+        }
+    };
 
     return (
         <div>
@@ -190,7 +187,7 @@ export default function DeadlinesPage() {
                                     "
                                     style={{ background:"linear-gradient(90deg, #373C44 0%, #6C7178 100%)"}}
                                 >
-                                    {row.title}
+                                    {row.name}
                                 </TableCell>
 
                                 {/* DUE DATE COLUMN */}
@@ -264,15 +261,7 @@ export default function DeadlinesPage() {
                     <EditDeadlineModal
                         open={editModalOpen}
                         onClose={() => setEditModalOpen(false)}
-                        deadline={
-                            selectedRow
-                                ? {
-                                    id: selectedRow.id,
-                                    title: selectedRow.title,
-                                    dueDate: new Date(selectedRow.dueDate),
-                                }
-                                : null
-                        }
+                        deadline={selectedRow}
                         onUpdate={handleUpdateDeadline}
                     />
                 </SectionContainer>

@@ -1,12 +1,15 @@
-import { DeadlinesSchema } from "@/lib/zod/deadline";
+import { api } from "./apiClient";
+import { Deadline, CreateDeadlineDto, UpdateDeadlineDto } from "@/lib/types/entities/deadline";
 
-export async function getDeadlinesService() {
-  const res = await fetch("/api/deadlines");
+export const deadlinesService = {
+  getAll: () => api.get<Deadline[]>('/deadlines'),
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch deadlines");
-  }
+  getById: (id: number) => api.get<Deadline>(`/deadlines/${id}`),
 
-  const json = await res.json();
-  return DeadlinesSchema.parse(json);
-}
+  create: (dto: CreateDeadlineDto) => api.post<Deadline>('/deadlines', dto),
+
+  update: (id: number, dto: UpdateDeadlineDto) =>
+    api.patch<Deadline>(`/deadlines/${id}`, dto),
+
+  delete: (id: number) => api.delete<string>(`/deadlines/${id}`),
+};

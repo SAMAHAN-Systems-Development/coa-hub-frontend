@@ -1,12 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { getDeadlinesService } from "../services/deadlines.services";
-
-export const DEADLINES_QUERY_KEY = ["deadlines"];
+import { deadlinesService } from "../services/deadlines.services";
 
 export function useDeadlinesQuery() {
   return useQuery({
-    queryKey: DEADLINES_QUERY_KEY,
-    queryFn: getDeadlinesService,
+    queryKey: ["deadlines"],
+    queryFn: deadlinesService.getAll,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useDeadlineQuery(id: number) {
+  return useQuery({
+    queryKey: ["deadlines", id],
+    queryFn: () => deadlinesService.getById(id),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!id,
   });
 }
