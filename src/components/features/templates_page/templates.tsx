@@ -147,8 +147,8 @@ export default function TemplatesPage() {
     >
         <ContentContainer>
         <SectionContainer>
-            <div className="flex justify-between items-center">
-            <h1 className="text-7xl font-medium font-bebas-neue uppercase">
+            <div className="flex flex-col md:flex-row md:justify-between items-center">
+            <h1 className="text-6xl md:text-7xl text-white font-medium font-bebas-neue uppercase">
                 Templates
             </h1>
             {isAdmin && (
@@ -159,9 +159,10 @@ export default function TemplatesPage() {
                 size="lg"
                 rounded="md"
                 className="
-                  px-8 py-6 text-lg font-light 
+                  px-6 py-4 md:px-8 md:py-6 
+                  text-xs sm:text-base md:text-lg font-light
                   hover:!shadow-md
-                  hover:scale-[1.02]
+                  hover:scale-[1.02] w-2/3 md:w-auto
                 "
               >
                 Add New Template
@@ -171,7 +172,17 @@ export default function TemplatesPage() {
             <Spacer size={20} />
 
             {/* TEMPLATE GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-10 gap-x-0 place-items-center px-60">
+            <div
+              className="
+                grid grid-cols-1 
+                gap-y-10 px-4 sm:px-10 place-items-center
+
+                md:grid-cols-2 
+                md:gap-y-12 md:gap-x-8 
+                md:px-20 
+                lg:px-40
+              "
+            >
                 {templates.map((template, index) => {
                     const previewUrl = getDrivePreviewUrl(template.driveLink);
                     // Check if last item and odd number of templates
@@ -181,9 +192,10 @@ export default function TemplatesPage() {
                     return (
                     <div
                       key={template.id}
-                      className={`relative group flex flex-col items-center ${
-                        isLastOdd ? "col-span-2 justify-self-center" : ""
-                      }`}
+                      className={`
+                        relative group flex flex-col items-center 
+                        ${isLastOdd ? "md:col-span-2 md:justify-self-center" : ""}
+                      `}
                     >
                       {/* WHITE BOX for IMAGE ONLY */}
                        <div className="relative group bg-white rounded-xl shadow-lg p-3 w-full max-w-[800px] overflow-hidden hover:scale-[1.02] transition-transform">
