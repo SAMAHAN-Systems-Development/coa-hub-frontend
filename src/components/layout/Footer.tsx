@@ -70,7 +70,7 @@ export default function Footer() {
         </div>
         <div className="mt-12 md:mt-0 flex justify-center items-center w-full md:w-auto">
           <img
-            src="assets/images/footer-logo.png"
+            src="/assets/images/footer-logo.png"
             alt="COA Footer Logo"
             className="w-72 h-auto"
           />
