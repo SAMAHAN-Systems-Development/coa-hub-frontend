@@ -8,7 +8,7 @@ import ActionModal from "@/components/features/action_modal";
 interface CreateNewTemplateProps {
     open: boolean;
     onClose: () => void;
-    onSave: (data: { title: string; driveLink: string }) => void;
+    onSave: (data: { name: string; gdriveLink: string }) => void;
 }
 
 export default function CreateNewTemplateModal({
@@ -16,20 +16,20 @@ export default function CreateNewTemplateModal({
     onClose,
     onSave,
 }: CreateNewTemplateProps) {
-    const [title, setTitle] = useState("");
-    const [driveLink, setDriveLink] = useState("");
+    const [name, setName] = useState("");
+    const [gdriveLink, setGDriveLink] = useState("");
 
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     function handleSaveClick() {
-        if (!title  || !driveLink) return;
+        if (!name  || !gdriveLink) return;
         setConfirmOpen(true);
     }
 
     function confirmSave() {
         onSave({
-            title,
-            driveLink,
+            name,
+            gdriveLink,
         });
 
         resetForm();
@@ -38,8 +38,8 @@ export default function CreateNewTemplateModal({
     }
 
     function resetForm() {
-        setTitle("");
-        setDriveLink("");
+        setName("");
+        setGDriveLink("");
     }
 
     return (
@@ -86,8 +86,8 @@ export default function CreateNewTemplateModal({
 
                         <Input
                             placeholder="Add Subject"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             className="
                             bg-[#E6E9EE] 
                             text-gray-700 
@@ -115,8 +115,8 @@ export default function CreateNewTemplateModal({
 
                             <Input
                                 placeholder="Paste Google Drive link"
-                                value={driveLink}
-                                onChange={(e) => setDriveLink(e.target.value)}
+                                value={gdriveLink}
+                                onChange={(e) => setGDriveLink(e.target.value)}
                                 className="
                                     bg-[#E6E9EE] 
                                     text-gray-700 

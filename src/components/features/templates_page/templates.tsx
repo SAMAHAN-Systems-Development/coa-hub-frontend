@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ContentContainer } from "@/components/layout/ContentContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Spacer } from "@/components/layout/Spacer";
@@ -10,64 +10,59 @@ import CreateNewTemplateModal from "@/components/features/templates_page/create_
 import EditTemplateModal from "@/components/features/templates_page/edit_template_modal";
 import { Pencil } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
-
-interface TemplateItem {
-  id: string;
-  title: string;
-  driveLink: string;
-}
+import { useTemplatesQuery } from "@/lib/api/queries/use-templates";
+import { useCreateTemplateMutation, useUpdateTemplateMutation, useDeleteTemplateMutation } from "@/lib/api/mutations/template.mutation";
+import { SkeletonCard } from "@/components/shared/loading-skeleton";
+import { toastError, toastSuccess } from "@/components/shared/toast";
 
 export default function TemplatesPage() {
-  const [templates, setTemplates] = useState<TemplateItem[]>([
-    {
-      id: "1",
-      title: "Sample Proposal Template",
-      driveLink:
-        "https://docs.google.com/document/d/1OC_WI9WveevrvFYn0F4FERmMWyhjrFL1SJZP93RLEcs/edit?usp=drive_link",
-    },
-    {
-      id: "2",
-      title: "Sample Proposal Template 2",
-      driveLink:
-        "https://drive.google.com/file/d/1f3z1_rEUAtFgJeO4ejddvA6cDDOSyyPA/view?usp=drive_link",
-    },
-    {
-      id: "3",
-      title: "Sample Proposal Template 3",
-      driveLink:
-        "https://docs.google.com/document/d/1OC_WI9WveevrvFYn0F4FERmMWyhjrFL1SJZP93RLEcs/edit?usp=drive_link",
-    },
-    {
-      id: "4",
-      title: "Sample Proposal Template 4",
-      driveLink:
-        "https://docs.google.com/document/d/1OC_WI9WveevrvFYn0F4FERmMWyhjrFL1SJZP93RLEcs/edit?usp=drive_link",
-    },
-    {
-      id: "5",
-      title: "Sample Proposal Template 5",
-      driveLink:
-        "https://docs.google.com/document/d/1OC_WI9WveevrvFYn0F4FERmMWyhjrFL1SJZP93RLEcs/edit?usp=drive_link",
-    },
-  ]);
-
+  
   const [isAdmin, setIsAdmin] = useState(true); // toggle for testing user vs admin
   const [showDialog, setShowDialog] = useState(false);
-
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [templateBeingEdited, setTemplateBeingEdited] = useState<TemplateItem | null>(null);
-
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateItem | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
 
-  const [newTemplate, setNewTemplate] = useState<{
-    title: string;
-    driveLink: string;
-  }>({
-    title: "",
-    driveLink: "",
-  });
+  const { data: templates, isLoading, error } = useTemplatesQuery();
+  const createTemplate = useCreateTemplateMutation();
+  const updateTemplate = useUpdateTemplateMutation(selectedTemplate?.id);
+  const deleteTemplate = useDeleteTemplateMutation(selectedTemplate?.id);
 
+  const totalTemplates = templates?.length ?? 0;
+
+  // const [newTemplate, setNewTemplate] = useState<{
+  //   name: string;
+  //   gdriveLink: string;
+  // }>({
+  //   name: "",
+  //   gdriveLink: "",
+  // });
+
+  useEffect(() => {
+      if (error) {
+          toastError({
+              title: "Failed to load templates",
+              description: "Please check your connection and try again.",
+          });
+      }
+  }, [error]);
+
+  if (isLoading) {
+    return (
+        <ContentContainer>
+            <SectionContainer>
+                {/* Header skeleton */}
+                <SkeletonCard size="lg" variant="text-only" className="mb-6" />
+
+                {/* Table skeleton */}
+                <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] mt-8">
+                    <SkeletonCard size="md" lines={4} />
+                </div>
+            </SectionContainer>
+        </ContentContainer>
+    );
+  }
+  
   function getDrivePreviewUrl(link: string): string {
     if (!link) return "";
 
@@ -110,32 +105,69 @@ export default function TemplatesPage() {
     return link;
   }
 
-  const handleAddTemplate = () => {
-    if (!newTemplate.title || !newTemplate.driveLink) return;
-
-    setTemplates([
-      ...templates,
-      {
-        id: Date.now().toString(),
-        title: newTemplate.title,
-        driveLink: newTemplate.driveLink, // preview URL
-      },
-    ]);
-
-    setNewTemplate({
-      title: "",
-      driveLink: "",
-    });
-
-    setShowDialog(false); // optional: closes dialog after saving
+  const handleAddTemplate = async (data: { name: string; gdriveLink: string }) => {
+      try {
+          await createTemplate.mutateAsync({
+              name: data.name,
+              gdriveLink: data.gdriveLink,
+          });
+          toastSuccess({
+              title: "Template created",
+              description: "Your new template has been saved.",
+          });
+          setShowDialog(false);
+          } catch (err) {
+          console.error("Failed to create template:", err);
+          toastError({
+              title: "Failed to create template",
+              description: "Please try again.",
+          });
+      }
   };
 
-  const handleDelete = () => {
-    if (!selectedTemplate) return;
+  const handleUpdateTemplate = async (data: { name: string; gdriveLink: string }) => {
+      if (!selectedTemplate) return;
 
-    setTemplates(templates.filter((t) => t.id !== selectedTemplate.id));
-    setDeleteModalOpen(false);
-    setSelectedTemplate(null);
+      try {
+      await updateTemplate.mutateAsync({
+          id: selectedTemplate.id,
+          dto: {
+          name: data.name,
+          gdriveLink: data.gdriveLink,
+          },
+      });
+      toastSuccess({
+          title: "Template updated",
+          description: "Changes have been saved.",
+      });
+      setEditModalOpen(false);
+      } catch (err) {
+      console.error("Failed to update template:", err);
+      toastError({
+          title: "Failed to update template",
+          description: "Please try again.",
+      });
+      }
+  };
+
+  const handleDelete = async () => {
+      if (!selectedTemplate) return;
+
+      try {
+      await deleteTemplate.mutateAsync(selectedTemplate.id);
+      toastSuccess({
+          title: "Template deleted",
+          description: "The template has been removed.",
+      });
+      setDeleteModalOpen(false);
+      setSelectedTemplate(null);
+      } catch (err) {
+      console.error("Failed to delete template:", err);
+      toastError({
+          title: "Failed to delete template",
+          description: "Please try again.",
+      });
+      }
   };
 
   return (
@@ -183,12 +215,11 @@ export default function TemplatesPage() {
                 lg:px-40
               "
             >
-                {templates.map((template, index) => {
-                    const previewUrl = getDrivePreviewUrl(template.driveLink);
+                {templates?.map((template, index) => {
+                    const previewUrl = getDrivePreviewUrl(template.gdriveLink);
                     // Check if last item and odd number of templates
                     const isLastOdd =
-                    templates.length % 2 !== 0 && index === templates.length - 1;
-
+                      totalTemplates % 2 !== 0 && index === totalTemplates - 1;
                     return (
                     <div
                       key={template.id}
@@ -222,7 +253,7 @@ export default function TemplatesPage() {
                             <button
                               className="text-gray-800 group-hover:text-white transition-colors"
                               onClick={() => {
-                                  setTemplateBeingEdited(template);
+                                  setSelectedTemplate(template);
                                   setEditModalOpen(true);
                               }}
                             >
@@ -242,7 +273,7 @@ export default function TemplatesPage() {
 
                         {/* Clickable Image */}
                          <a
-                            href={template.driveLink}
+                            href={template.gdriveLink}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="relative block z-0"
@@ -256,14 +287,14 @@ export default function TemplatesPage() {
                           </a>
                       </div>
 
-                      {/* TITLE (white text, NOT inside the white background) */}
+                      {/* NAME (white text, NOT inside the white background) */}
                       <a
-                        href={template.driveLink}
+                        href={template.gdriveLink}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <h2 className="mt-3 text-center text-white font-thin text-sm md:text-base transition-all group-hover:scale-[1.05] group-hover:text-white/90">
-                          {template.title}
+                          {template.name}
                         </h2>
                       </a>
                     </div>
@@ -277,29 +308,14 @@ export default function TemplatesPage() {
         <CreateNewTemplateModal
           open={showDialog}
           onClose={() => setShowDialog(false)}
-          onSave={(data) => {
-            setTemplates(prev => [
-              ...prev,
-              {
-                id: Date.now().toString(),
-                title: data.title,
-                driveLink: data.driveLink,
-              },
-            ]);
-
-            setShowDialog(false);
-          }}
+          onSave={handleAddTemplate}
         />
 
         <EditTemplateModal
           open={editModalOpen}
           onClose={() => setEditModalOpen(false)}
-          template={templateBeingEdited}
-          onUpdate={(updated) => {
-              setTemplates(prev =>
-                  prev.map(t => (t.id === updated.id ? { ...t, ...updated } : t))
-              );
-          }}
+          template={selectedTemplate}
+          onUpdate={handleUpdateTemplate}
         />
 
         {/* Delete Confirmation */}
@@ -309,7 +325,7 @@ export default function TemplatesPage() {
           title="DELETE TEMPLATE?"
           description={
             selectedTemplate
-              ? `Are you sure you want to permanently delete "${selectedTemplate.title}"? This cannot be undone.`
+              ? `Are you sure you want to permanently delete "${selectedTemplate.name}"? This cannot be undone.`
               : ""
           }
           confirmText="Delete"

@@ -12,10 +12,10 @@ interface EditTemplateModalProps {
     onClose: () => void;
     template: {
         id: string;
-        title: string;
-        driveLink: string;
+        name: string;
+        gdriveLink: string;
     } | null;
-    onUpdate: (updated: { id: string; title: string; driveLink: string }) => void;
+    onUpdate: (updated: { id: string; name: string; gdriveLink: string }) => void;
 }
 
 export default function EditTemplateModal({
@@ -25,16 +25,16 @@ export default function EditTemplateModal({
     onUpdate,
 }: EditTemplateModalProps) {
     
-    const [title, setTitle] = useState("");
-    const [driveLink, setDriveLink] = useState("");;
+    const [name, setName] = useState("");
+    const [gdriveLink, setGDriveLink] = useState("");
 
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     // Load selected template info when modal opens
     useEffect(() => {
         if (template) {
-            setTitle(template.title);
-            setDriveLink(template.driveLink);
+            setName(template.name);
+            setGDriveLink(template.gdriveLink);
         }
     }, [template, open]);
 
@@ -49,8 +49,8 @@ export default function EditTemplateModal({
 
         onUpdate({
             id: template.id,
-            title,
-            driveLink,
+            name,
+            gdriveLink,
         });
 
         setConfirmOpen(false);
@@ -86,8 +86,8 @@ export default function EditTemplateModal({
 
                             <Input
                                 placeholder="Add Subject"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className="bg-[#E6E9EE] text-gray-700 placeholder:text-gray-500 rounded-xl h-12 border border-white/20 px-4"
                             />
                         </div>
@@ -101,8 +101,8 @@ export default function EditTemplateModal({
 
                             <Input
                                 placeholder="Paste Google Drive link"
-                                value={driveLink}
-                                onChange={(e) => setDriveLink(e.target.value)}
+                                value={gdriveLink}
+                                onChange={(e) => setGDriveLink(e.target.value)}
                                 className="bg-[#E6E9EE] text-gray-700 placeholder:text-gray-500 rounded-xl h-12 border border-white/20 px-4"
                             />
                         </div>
