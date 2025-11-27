@@ -55,7 +55,7 @@ export default function DeadlinesPage() {
         );
     }
 
-    const handleSaveDeadline = async (data: { name: string; dueDate: Date }) => {
+    const handleAddDeadline = async (data: { name: string; dueDate: Date }) => {
         try {
             await createDeadline.mutateAsync({
                 name: data.name,
@@ -256,7 +256,7 @@ export default function DeadlinesPage() {
                     <CreateNewDeadlineModal
                         open={showDialog}
                         onClose={() => setShowDialog(false)}
-                        onSave={handleSaveDeadline}
+                        onSave={handleAddDeadline}
                     />
                     <EditDeadlineModal
                         open={editModalOpen}
