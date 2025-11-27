@@ -30,14 +30,6 @@ export default function TemplatesPage() {
 
   const totalTemplates = templates?.length ?? 0;
 
-  // const [newTemplate, setNewTemplate] = useState<{
-  //   name: string;
-  //   gdriveLink: string;
-  // }>({
-  //   name: "",
-  //   gdriveLink: "",
-  // });
-
   useEffect(() => {
       if (error) {
           toastError({
