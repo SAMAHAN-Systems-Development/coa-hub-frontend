@@ -2,13 +2,14 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { FaSearch, FaUserCircle } from "react-icons/fa";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const navFont = { fontFamily: "'Bebas Neue', sans-serif" };
 
 const Navbar = () => {
-  const router = useRouter();
+  const { isAuthenticated, isAdmin, user } = useAuth();
   const [aboutOpen, setAboutOpen] = useState(false);
   const [binsOpen, setBinsOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -18,7 +19,6 @@ const Navbar = () => {
   const profileRef = useRef<HTMLButtonElement | null>(null);
   const mobileRef = useRef<HTMLButtonElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const isAdmin = true;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -48,8 +48,13 @@ const Navbar = () => {
     };
   }, []);
 
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
+
   return (
     <nav
+      ref={containerRef}
       className="w-full shadow-sm relative"
       style={{
         ...navFont,
@@ -254,47 +259,56 @@ const Navbar = () => {
           >
             <FaSearch className="w-6 h-6 text-gray-700" />
           </button>
-          {/* user button */}
-          <div className="relative hidden md:block">
-            <button
-              ref={profileRef}
-              id="profile-button"
-              aria-expanded={profileOpen}
-              aria-controls="profile-menu"
-              className={`flex items-center px-4 py-2 rounded-lg transition-all font-montserrat ${
-                profileOpen
-                  ? "bg-gray-700 text-white underline"
-                  : "hover:bg-gray-700 hover:text-white hover:underline"
-              }`}
-              onClick={() => setProfileOpen((prev) => !prev)}
-              aria-label="User menu"
-            >
-              <FaUserCircle className="w-6 h-6 mr-2" />
-              User
-              {isAdmin && (
-                <span className="ml-2 px-2 py-0.5 bg-gradient-to-br from-[#373C44] to-[#49515A] text-white text-xs rounded font-bold">
-                  ADMIN
-                </span>
-              )}
-            </button>
-            {profileOpen && (
-              <ul
-                id="profile-menu"
-                role="menu"
-                aria-labelledby="profile-button"
-                className="absolute right-0 mt-2 min-w-[160px] bg-[#e7eaef] rounded-lg shadow-lg py-2 z-10 font-montserrat"
+          {/* user button - only show if authenticated */}
+          {isAuthenticated ? (
+            <div className="relative hidden md:block">
+              <button
+                ref={profileRef}
+                id="profile-button"
+                aria-expanded={profileOpen}
+                aria-controls="profile-menu"
+                className={`flex items-center px-4 py-2 rounded-lg transition-all font-montserrat ${
+                  profileOpen
+                    ? "bg-gray-700 text-white underline"
+                    : "hover:bg-gray-700 hover:text-white hover:underline"
+                }`}
+                onClick={() => setProfileOpen((prev) => !prev)}
+                aria-label="User menu"
               >
-                <li>
-                  <button
-                    className="block w-full text-left px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                    onClick={() => router.push("/logged-out")}
-                  >
-                    Sign Out
-                  </button>
-                </li>
-              </ul>
-            )}
-          </div>
+                <FaUserCircle className="w-6 h-6 mr-2" />
+                {user?.name || "User"}
+                {isAdmin && (
+                  <span className="ml-2 px-2 py-0.5 bg-gradient-to-br from-[#373C44] to-[#49515A] text-white text-xs rounded font-bold">
+                    ADMIN
+                  </span>
+                )}
+              </button>
+              {profileOpen && (
+                <ul
+                  id="profile-menu"
+                  role="menu"
+                  aria-labelledby="profile-button"
+                  className="absolute right-0 mt-2 min-w-[160px] bg-[#e7eaef] rounded-lg shadow-lg py-2 z-10 font-montserrat"
+                >
+                  <li>
+                    <button
+                      className="block w-full text-left px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
+                      onClick={handleSignOut}
+                    >
+                      Sign Out
+                    </button>
+                  </li>
+                </ul>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden md:flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-white hover:underline transition-all font-montserrat"
+            >
+              Log In
+            </Link>
+          )}
           {/* hamburger */}
           <button
             ref={mobileRef}
