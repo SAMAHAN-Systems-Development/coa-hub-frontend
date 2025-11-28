@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { FaSearch, FaUserCircle } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
 import { useAuth } from "@/lib/hooks/useAuth";
 
 const navFont = { fontFamily: "'Bebas Neue', sans-serif" };
@@ -58,18 +58,18 @@ const Navbar = () => {
       className="w-full shadow-sm relative"
       style={{
         ...navFont,
-        backgroundImage: "url('assets/images/header-bg.png')",
+        backgroundImage: "url('/assets/images/header-bg.png')",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
       }}
     >
       <div className="absolute inset-0 bg-white/70 pointer-events-none"></div>
-      <div className="relative max-w-7xl mx-auto flex items-center px-6 py-8">
+      <div className="relative max-w-7xl mx-auto flex items-center justify-between px-8 py-6 gap-4">
         {/* logo */}
         <div className="flex items-center gap-4 flex-shrink-0">
           <img
-            src="assets/images/logo-dark.png"
+            src="/assets/images/logo-dark.png"
             alt="COA Logo"
             className="w-12 h-12 rounded-full"
           />
@@ -80,7 +80,7 @@ const Navbar = () => {
         <div className="flex-1"></div>
 
         {/* nav links */}
-        <div className="flex items-center gap-8 ml-0 md:ml-50">
+        <div className="flex items-center gap-10">
           {/* desktop nav */}
           <ul className="hidden md:flex items-center gap-10 text-lg flex-nowrap">
             <li>
@@ -252,13 +252,6 @@ const Navbar = () => {
               )}
             </li>
           </ul>
-          {/* search button */}
-          <button
-            className="hidden md:flex items-center justify-center p-2 rounded-full hover:bg-gray-200 transition"
-            aria-label="Search"
-          >
-            <FaSearch className="w-6 h-6 text-gray-700" />
-          </button>
           {/* user button - only show if authenticated */}
           {isAuthenticated ? (
             <div className="relative hidden md:block">
@@ -276,10 +269,21 @@ const Navbar = () => {
                 aria-label="User menu"
               >
                 <FaUserCircle className="w-6 h-6 mr-2" />
-                {user?.name || "User"}
-                {isAdmin && (
-                  <span className="ml-2 px-2 py-0.5 bg-gradient-to-br from-[#373C44] to-[#49515A] text-white text-xs rounded font-bold">
-                    ADMIN
+                {isAdmin ? (
+                  <span className="flex items-center gap-1 max-w-[160px]">
+                    <span
+                      className="font-medium text-xs truncate"
+                      title={user?.email || "admin@example.com"}
+                    >
+                      {user?.email || "admin@example.com"}
+                    </span>
+                    <span className="px-1 py-0.5 bg-gradient-to-br from-[#373C44] to-[#49515A] text-white text-[10px] rounded font-bold ml-1">
+                      ADMIN
+                    </span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs font-medium max-w-[160px] truncate">
+                    {user?.name || "User"}
                   </span>
                 )}
               </button>

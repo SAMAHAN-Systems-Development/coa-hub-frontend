@@ -4,17 +4,30 @@ import { LuFacebook, LuTwitter, LuInstagram } from "react-icons/lu";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-gradient-to-br from-[#373C44] to-[#49515A] text-white py-12 px-8">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start">
-        <div>
-          <span
-            className="text-2xl tracking-wide text-[#E7EAEF]"
-            style={{ fontFamily: "'Bebas Neue', sans-serif" }}
-          >
-            COMMISSION ON AUDIT
-          </span>
-          <hr className="my-4 border-gray-400" />
-          <ul className="my-4 border-gray-400">
+    <footer className="w-full bg-gradient-to-br from-[#373C44] to-[#49515A] text-white py-10 px-8">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 px-8">
+        {/* Mobile: Logo on top, then title, nav, social. Desktop: Logo right, rest left. */}
+        <div className="w-full md:w-auto flex flex-col md:flex-col items-start pl-0 md:pl-2 order-2 md:order-1">
+          {/* mobile logo */}
+          <div className="block md:hidden mb-4 w-full flex justify-center">
+            <img
+              src="/assets/images/footer-logo.png"
+              alt="COA Footer Logo"
+              className="w-32 h-auto"
+            />
+          </div>
+          <div className="w-full md:w-auto">
+            <span
+              className="text-2xl tracking-wide text-[#E7EAEF] text-left"
+              style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+            >
+              COMMISSION ON AUDIT
+            </span>
+            <div className="my-2">
+              <hr className="border-[#6C7178] w-full md:w-[200px]" />
+            </div>
+          </div>
+          <ul className="mb-2 mt-4 border-gray-400 flex flex-col items-start">
             <li>
               <Link
                 href="/"
@@ -56,7 +69,7 @@ export default function Footer() {
               </Link>
             </li>
           </ul>
-          <div className="flex gap-4 mt-8">
+          <div className="flex gap-4 mt-8 justify-start w-full">
             <a href="#" aria-label="Facebook">
               <LuFacebook className="w-7 h-7" />
             </a>
@@ -68,11 +81,12 @@ export default function Footer() {
             </a>
           </div>
         </div>
-        <div className="mt-12 md:mt-0 flex justify-center items-center w-full md:w-auto">
+        {/* desktop logo on right */}
+        <div className="hidden md:flex mt-8 md:mt-0 justify-center items-center w-full md:w-auto order-1 md:order-2">
           <img
-            src="assets/images/footer-logo.png"
+            src="/assets/images/footer-logo.png"
             alt="COA Footer Logo"
-            className="w-72 h-auto"
+            className="w-64 h-auto"
           />
         </div>
       </div>
