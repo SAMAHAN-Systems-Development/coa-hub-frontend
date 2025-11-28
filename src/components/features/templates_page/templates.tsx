@@ -14,10 +14,11 @@ import { useTemplatesQuery } from "@/lib/api/queries/use-templates";
 import { useCreateTemplateMutation, useUpdateTemplateMutation, useDeleteTemplateMutation } from "@/lib/api/mutations/template.mutation";
 import { SkeletonCard } from "@/components/shared/loading-skeleton";
 import { toastError, toastSuccess } from "@/components/shared/toast";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function TemplatesPage() {
   
-  const [isAdmin, setIsAdmin] = useState(true); // toggle for testing user vs admin
+  const { isAdmin } = useAuth(); // toggle for testing user vs admin
   const [showDialog, setShowDialog] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);

@@ -16,10 +16,11 @@ import { useDeadlinesQuery } from "@/lib/api/queries/use-deadlines";
 import { useCreateDeadlineMutation, useUpdateDeadlineMutation, useDeleteDeadlineMutation } from "@/lib/api/mutations/deadline.mutation";
 import { SkeletonCard } from "@/components/shared/loading-skeleton";
 import { toastError, toastSuccess } from "@/components/shared/toast";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function DeadlinesPage() {
 
-    const [isAdmin, setIsAdmin] = useState(true); // toggle for testing user vs admin
+    const { isAdmin } = useAuth();  // toggle for testing user vs admin
     const [showDialog, setShowDialog] = useState(false);
     const [selectedRow, setSelectedRow] = useState<any>(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
