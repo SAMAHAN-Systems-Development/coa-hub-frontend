@@ -1,8 +1,8 @@
 'use client';
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import { useAuth } from '@/lib/hooks/useAuth';
-import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -13,32 +13,45 @@ export default function Home() {
 }
 
 function HomePage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Welcome to COA Hub</h1>
-        <p className="text-muted-foreground">
-          Hello, {user?.email}
-        </p>
-      </div>
+    <LayoutWrapper>
+      <div className="container mx-auto px-6 py-16">
 
-
-        {user?.isAdmin && (
-          <div className="p-6 border rounded-lg bg-primary/5">
-            <h2 className="text-xl font-semibold mb-2">Admin Dashboard</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Access admin tools and management features
-            </p>
-            <Link
-              href="/admin"
-              className="text-sm text-primary hover:underline font-semibold"
-            >
-              Go to Admin
-            </Link>
+        {/* User Info Card */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-8 shadow-md">
+            <h2 className="text-2xl font-semibold mb-4 font-bebas tracking-wide">
+              Your Account
+            </h2>
+            <div className="space-y-3 font-montserrat">
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-gray-600">Name:</span>
+                <span className="text-gray-900">{user?.name}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-gray-600">Email:</span>
+                <span className="text-gray-900">{user?.email}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-gray-600">Account Type:</span>
+                {isAdmin ? (
+                  <span className="px-3 py-1 bg-gradient-to-br from-[#373C44] to-[#49515A] text-white text-sm rounded font-bold">
+                    ADMIN
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded font-semibold">
+                    USER
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+
+
       </div>
+    </LayoutWrapper>
   );
 }
