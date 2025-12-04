@@ -278,7 +278,7 @@ export default function SubmissionBinPage() {
                 </SectionContainer>
             </ContentContainer>
             
-            {/* Add Template Dialog */}
+            {/* Add Submission Bin Dialog */}
             <CreateNewSubmissionBinModal
                 open={showDialog}
                 onClose={() => setShowDialog(false)}
