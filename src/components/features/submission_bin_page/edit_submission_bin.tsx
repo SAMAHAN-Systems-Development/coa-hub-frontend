@@ -1,0 +1,198 @@
+"use client";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { SharedButton } from "../../shared/SharedButton";
+import { Input } from "@/components/ui/input";
+import { SquarePen } from "lucide-react";
+import { useEffect, useState } from "react";
+import ActionModal from "@/components/features/action_modal";
+
+interface EditSubmissionBinModalProps {
+    open: boolean;
+    onClose: () => void;
+    submissionBin: {
+        id: string;
+        name: string;
+        instructions: string;
+    } | null;
+    onUpdate: (updated: { id: string; name: string; instructions: string }) => void;
+}
+
+export default function EditSubmissionBinModal({
+    open,
+    onClose,
+    submissionBin,
+    onUpdate,
+}: EditSubmissionBinModalProps) {
+    
+    const [name, setName] = useState("");
+    const [rawFileFormat, setRawFileFormat] = useState("");       // e.g. "Google Docs"
+    const [rawFileNameExample, setRawFileNameExample] = useState(""); // e.g. "ACC_LR_AUGUST"
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    // Load selected deadline info when modal opens
+    useEffect(() => {
+        if (submissionBin) {
+            setName(submissionBin.name);
+            const instructions = JSON.parse(submissionBin.instructions);
+            setRawFileFormat(instructions.rawFileFormat || "");
+            setRawFileNameExample(instructions.rawFileNameExample || "");
+        }
+    }, [submissionBin, open]);
+
+    // Show confirmation modal first
+    function handleSaveClick() {
+        if (!name || !rawFileFormat || !rawFileNameExample) return; 
+        setConfirmOpen(true);
+    }
+
+    // After confirming:
+    function confirmUpdate() {
+        if (!name || !rawFileFormat || !rawFileNameExample) return;
+        onUpdate({
+            id: submissionBin!.id,
+            name,
+            instructions: JSON.stringify({
+                rawFileFormat,
+                rawFileNameExample,
+            }),
+        });
+
+        setConfirmOpen(false);
+        onClose();
+    }
+
+    return (
+        <>
+            <Dialog open={open} onOpenChange={onClose}>
+                <DialogContent
+                    className="w-full !max-w-[1200px] max-h-full overflow-y-auto rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
+                    style={{ background: "linear-gradient(225deg, #6C7178 0%, #373C44 100%)" }}
+                >
+                    {/* HEADER */}
+                    <DialogHeader>
+                        <div className="mt-3 flex items-center gap-3">
+                            <SquarePen className="w-7 h-7 md:w-11 md:h-11" />
+                            <DialogTitle className="text-4xl md:text-5xl font-bebas-neue font-medium tracking-wide">
+                                EDIT SUBMISSION BIN
+                            </DialogTitle>
+                        </div>
+                    </DialogHeader>
+
+                    {/* FORM CONTENT */}
+                    <div className="mt-2 md:mt-8 space-y-6 pb-10 lg:pb-0">
+
+                        {/* SUBMISSION BIN NAME */}
+                        <div
+                            className="rounded-2xl p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] flex flex-col gap-3"
+                            style={{ background: "linear-gradient(90deg, rgba(120,125,133,0.65), rgba(55,60,68,0.90))" }}
+                        >
+                            <label className="text-white text-base md:text-xl font-medium">Submission Bin Name</label>
+
+                            <Input
+                                placeholder="Add Submission Bin Name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="bg-[#E6E9EE] 
+                                text-gray-700 text-xs sm:text-sm md:text-xl 
+                                placeholder:text-gray-500 
+                                rounded-sm 
+                                h-8 md:h-12
+                                border border-white/20
+                                px-2 md:px-4"
+                            />
+                        </div>
+
+                        <div
+                            className="
+                                rounded-2xl p-6
+                                shadow-[0px_20px_60px_-20px_rgba(0,0,0,0.35)]
+                                flex flex-col gap-6
+                            "
+                            style={{
+                                background:
+                                "linear-gradient(90deg, rgba(120,125,133,0.65), rgba(55,60,68,0.90))",
+                            }}
+                        >
+                            <label className="text-white text-base md:text-xl font-medium">Instructions</label>
+
+                            {/* RAW FILE FORMAT */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-white text-base md:text-xl font-medium">Raw File Format</label>
+                                <Input
+                                placeholder="e.g. Google Docs"
+                                value={rawFileFormat}
+                                onChange={(e) => setRawFileFormat(e.target.value)}
+                                className="
+                                    bg-[#E6E9EE] 
+                                    text-gray-700 text-xs sm:text-sm md:text-xl
+                                    placeholder:text-gray-500 
+                                    rounded-xl 
+                                    h-12
+                                    border border-white/20
+                                    px-4
+                                "
+                                />
+                            </div>
+
+                            {/* RAW FILE NAME EXAMPLE */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-white text-base md:text-xl font-medium">
+                                    Raw File Name Example
+                                </label>
+                                <Input
+                                    placeholder="e.g. ACC_LR_AUGUST"
+                                    value={rawFileNameExample}
+                                    onChange={(e) => setRawFileNameExample(e.target.value)}
+                                    className="
+                                        bg-[#E6E9EE] 
+                                        text-gray-700 text-xs sm:text-sm md:text-xl
+                                        placeholder:text-gray-500 
+                                        rounded-xl 
+                                        h-12
+                                        border border-white/20
+                                        px-4
+                                    "
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* FOOTER */}
+                    <DialogFooter className="mt-1 md:mt-8 flex flex-row justify-end gap-4">
+                        <SharedButton 
+                            onClick={handleSaveClick} 
+                            size="lg" 
+                            rounded="lg" 
+                            tone="glass" 
+                            className="h-11 !px-8 !text-sm sm:!px-12 sm:!text-base md:min-w-[130px] md:!text-base"
+                        >
+                            Save
+                        </SharedButton>
+
+                        <SharedButton 
+                            onClick={onClose} 
+                            size="lg" 
+                            rounded="lg" 
+                            tone="glass" 
+                            className="h-11 !px-6 !text-sm sm:!px-10 sm:!text-base md:min-w-[130px] md:!text-base"
+                        >
+                            Cancel
+                        </SharedButton>
+                    </DialogFooter>
+
+                </DialogContent>
+            </Dialog>
+            <ActionModal
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                title="EDIT SUBMISSION BIN?"
+                description="Are you sure you want to save these changes? Information will be updated."
+                confirmText="Save"
+                cancelText="Go Back"
+                onConfirm={confirmUpdate}
+                onCancel={() => setConfirmOpen(false)}
+            />
+        </>
+    );
+}
