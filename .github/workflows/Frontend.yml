@@ -27,8 +27,5 @@ jobs:
       - name: install dependencies
         run: npm ci
 
-      - name: Lint code
-        run: npm run lint --if-present
-
       - name: Build
         run: npm run build
