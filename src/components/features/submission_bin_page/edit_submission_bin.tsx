@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { SharedButton } from "../../shared/SharedButton";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SquarePen } from "lucide-react";
 import { useEffect, useState } from "react";
 import ActionModal from "@/components/features/action_modal";
@@ -13,9 +14,10 @@ interface EditSubmissionBinModalProps {
     submissionBin: {
         id: string;
         name: string;
-        instructions: string;
+        fileFormat: string;
+        fileName: string;
     } | null;
-    onUpdate: (updated: { id: string; name: string; instructions: string }) => void;
+    onUpdate: (updated: { id: string; name: string; fileFormat: string; fileName: string }) => void;
 }
 
 export default function EditSubmissionBinModal({
@@ -26,36 +28,33 @@ export default function EditSubmissionBinModal({
 }: EditSubmissionBinModalProps) {
     
     const [name, setName] = useState("");
-    const [rawFileFormat, setRawFileFormat] = useState("");       // e.g. "Google Docs"
-    const [rawFileNameExample, setRawFileNameExample] = useState(""); // e.g. "ACC_LR_AUGUST"
+    const [fileFormat, setFileFormat] = useState("");       // e.g. "Google Docs"
+    const [fileName, setFileName] = useState(""); // e.g. "ACC_LR_AUGUST"
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     // Load selected deadline info when modal opens
     useEffect(() => {
         if (submissionBin) {
             setName(submissionBin.name);
-            const instructions = JSON.parse(submissionBin.instructions);
-            setRawFileFormat(instructions.rawFileFormat || "");
-            setRawFileNameExample(instructions.rawFileNameExample || "");
+            setFileFormat(submissionBin.fileFormat);
+            setFileName(submissionBin.fileName);
         }
     }, [submissionBin, open]);
 
     // Show confirmation modal first
     function handleSaveClick() {
-        if (!name || !rawFileFormat || !rawFileNameExample) return; 
+        if (!name || !fileFormat || !fileName) return; 
         setConfirmOpen(true);
     }
 
     // After confirming:
     function confirmUpdate() {
-        if (!name || !rawFileFormat || !rawFileNameExample) return;
+        if (!name || !fileFormat || !fileName) return;
         onUpdate({
             id: submissionBin!.id,
             name,
-            instructions: JSON.stringify({
-                rawFileFormat,
-                rawFileNameExample,
-            }),
+            fileFormat,
+            fileName,
         });
 
         setConfirmOpen(false);
@@ -119,20 +118,15 @@ export default function EditSubmissionBinModal({
                             {/* RAW FILE FORMAT */}
                             <div className="flex flex-col gap-2">
                                 <label className="text-white text-base md:text-xl font-medium">Raw File Format</label>
-                                <Input
-                                placeholder="e.g. Google Docs"
-                                value={rawFileFormat}
-                                onChange={(e) => setRawFileFormat(e.target.value)}
-                                className="
-                                    bg-[#E6E9EE] 
-                                    text-gray-700 text-xs sm:text-sm md:text-xl
-                                    placeholder:text-gray-500 
-                                    rounded-xl 
-                                    h-12
-                                    border border-white/20
-                                    px-4
-                                "
-                                />
+                                <Select value={fileFormat} onValueChange={setFileFormat}>
+                                    <SelectTrigger className="w-full py-6 bg-[#E6E9EE] text-gray-700 text-xs sm:text-sm md:text-xl placeholder:text-gray-500 rounded-xl h-12 border border-white/20 px-4">
+                                        <SelectValue placeholder="Select file format" />
+                                    </SelectTrigger>
+                                    <SelectContent className="text-gray-700 text-xs sm:text-sm md:text-xl">
+                                        <SelectItem value="Google Docs (.docx)">Google Docs (.docx)</SelectItem>
+                                        <SelectItem value="PDF File (.pdf)">PDF File (.pdf)</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* RAW FILE NAME EXAMPLE */}
@@ -142,8 +136,8 @@ export default function EditSubmissionBinModal({
                                 </label>
                                 <Input
                                     placeholder="e.g. ACC_LR_AUGUST"
-                                    value={rawFileNameExample}
-                                    onChange={(e) => setRawFileNameExample(e.target.value)}
+                                    value={fileName}
+                                    onChange={(e) => setFileName(e.target.value)}
                                     className="
                                         bg-[#E6E9EE] 
                                         text-gray-700 text-xs sm:text-sm md:text-xl

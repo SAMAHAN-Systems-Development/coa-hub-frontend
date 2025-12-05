@@ -3,7 +3,8 @@ import { z } from "zod";
 export const SubmissionBinSchema = z.object({
     id: z.string(),
     name: z.string(),
-    instructions: z.string(),
+    fileFormat: z.string(),
+    fileName: z.string(),
 });
 
 export const SubmissionBinsSchema = z.array(SubmissionBinSchema);

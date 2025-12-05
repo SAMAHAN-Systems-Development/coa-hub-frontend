@@ -1,7 +1,8 @@
 export interface SubmissionBin {
   id: number;
   name: string;
-  instructions: string;
+  fileFormat: string;
+  fileName: string;
   createdById: number;
   createdAt: string;
   modifiedAt: string;
@@ -10,10 +11,12 @@ export interface SubmissionBin {
 
 export interface CreateSubmissionBinDto {
   name: string;
-  instructions: string;
+  fileFormat: string;
+  fileName: string;
 }
 
 export interface UpdateSubmissionBinDto {
   name?: string;
-  instructions?: string;
+  fileFormat?: string;
+  fileName?: string;
 }

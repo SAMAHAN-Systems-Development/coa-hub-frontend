@@ -56,11 +56,12 @@ export default function SubmissionBinPage() {
         );
     }
 
-    const handleAddSubmissionBin = async (data: { name: string, instructions: string }) => {
+    const handleAddSubmissionBin = async (data: { name: string, fileFormat: string, fileName: string }) => {
         try {
             await createSubmissionBin.mutateAsync({
                 name: data.name,
-                instructions: data.instructions,
+                fileFormat: data.fileFormat,
+                fileName: data.fileName
             });
             toastSuccess({
                 title: "Submission bin created",
@@ -76,7 +77,7 @@ export default function SubmissionBinPage() {
         }
     };
 
-    const handleUpdateSubmissionBin = async (data: { name: string; instructions: string }) => {
+    const handleUpdateSubmissionBin = async (data: { name: string; fileFormat: string; fileName: string }) => {
         if (!selectedSubmissionBin) return;
 
         try {
@@ -84,7 +85,8 @@ export default function SubmissionBinPage() {
             id: selectedSubmissionBin.id,
             dto: {
             name: data.name,
-            instructions: data.instructions,
+            fileFormat: data.fileFormat,
+            fileName: data.fileName,
             },
         });
         toastSuccess({

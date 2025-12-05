@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { SharedButton } from "../../shared/SharedButton";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import ActionModal from "@/components/features/action_modal"; 
@@ -8,7 +9,7 @@ import ActionModal from "@/components/features/action_modal";
 interface CreateNewSubmissionBinProps {
     open: boolean;
     onClose: () => void;
-    onSave: (data: { name: string; instructions: string }) => void;
+    onSave: (data: { name: string; fileFormat: string; fileName: string }) => void;
 }
 
 export default function CreateNewSubmissionBinModal({
@@ -17,27 +18,21 @@ export default function CreateNewSubmissionBinModal({
     onSave,
 }: CreateNewSubmissionBinProps) {
     const [name, setName] = useState("");
-    const [rawFileFormat, setRawFileFormat] = useState("");       // e.g. "Google Docs"
-    const [rawFileNameExample, setRawFileNameExample] = useState(""); // e.g. "ACC_LR_AUGUST"
+    const [fileFormat, setFileFormat] = useState("");       // e.g. "Google Docs"
+    const [fileName, setFileName] = useState(""); // e.g. "ACC_LR_AUGUST"
 
     const [confirmOpen, setConfirmOpen] = useState(false);
 
-    function buildInstructionsJson() {
-        return JSON.stringify({
-            rawFileFormat: rawFileFormat.trim(),
-            rawFileNameExample: rawFileNameExample.trim(),
-        });
-    }
-
     function handleSaveClick() {
-       if (!name || !rawFileFormat || !rawFileNameExample) return;
+       if (!name || !fileFormat || !fileName) return;
         setConfirmOpen(true);
     }
 
     function confirmSave() {
         onSave({
             name: name.trim(),
-            instructions: buildInstructionsJson(),
+            fileFormat: fileFormat.trim(),
+            fileName: fileName.trim(),
         });
 
         resetForm();
@@ -47,8 +42,8 @@ export default function CreateNewSubmissionBinModal({
 
     function resetForm() {
         setName("");
-        setRawFileFormat("");
-        setRawFileNameExample("");
+        setFileFormat("");
+        setFileName("");
     }
 
     return (
@@ -125,21 +120,16 @@ export default function CreateNewSubmissionBinModal({
 
                             {/* RAW FILE FORMAT */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-white text-base md:text-xl font-medium">Raw File Format</label>
-                                <Input
-                                placeholder="e.g. Google Docs"
-                                value={rawFileFormat}
-                                onChange={(e) => setRawFileFormat(e.target.value)}
-                                className="
-                                    bg-[#E6E9EE] 
-                                    text-gray-700 text-xs sm:text-sm md:text-xl 
-                                    placeholder:text-gray-500 
-                                    rounded-xl 
-                                    h-12
-                                    border border-white/20
-                                    px-4
-                                "
-                                />
+                                <label className="text-white text-base md:text-xl font-medium">File Format</label>
+                                <Select value={fileFormat} onValueChange={setFileFormat}>
+                                    <SelectTrigger className="w-full py-6 bg-[#E6E9EE] text-gray-700 text-xs sm:text-sm md:text-xl placeholder:text-gray-500 rounded-xl h-12 border border-white/20 px-4">
+                                        <SelectValue placeholder="Select file format" />
+                                    </SelectTrigger>
+                                    <SelectContent className="text-gray-700 text-xs sm:text-sm md:text-xl">
+                                        <SelectItem value="Google Docs (.docx)">Google Docs (.docx)</SelectItem>
+                                        <SelectItem value="PDF File (.pdf)">PDF File (.pdf)</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* RAW FILE NAME EXAMPLE */}
@@ -149,8 +139,8 @@ export default function CreateNewSubmissionBinModal({
                                 </label>
                                 <Input
                                     placeholder="e.g. ACC_LR_AUGUST"
-                                    value={rawFileNameExample}
-                                    onChange={(e) => setRawFileNameExample(e.target.value)}
+                                    value={fileName}
+                                    onChange={(e) => setFileName(e.target.value)}
                                     className="
                                         bg-[#E6E9EE] 
                                         text-gray-700 text-xs sm:text-sm md:text-xl 
@@ -172,7 +162,7 @@ export default function CreateNewSubmissionBinModal({
                             size="lg"
                             rounded="lg"
                             tone="glass"
-                            disabled={!name || !rawFileFormat || !rawFileNameExample}
+                            disabled={!name || !fileFormat || !fileName}
                             className="h-11 !px-6 !text-sm sm:!px-10 sm:!text-base md:min-w-[130px] md:!text-base"
                         >
                             Save
