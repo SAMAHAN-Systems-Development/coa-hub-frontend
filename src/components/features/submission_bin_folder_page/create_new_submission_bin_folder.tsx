@@ -3,7 +3,9 @@ import { SharedButton } from "../../shared/SharedButton";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import ActionModal from "@/components/features/action_modal"; 
+import ActionModal from "@/components/features/action_modal";
+import { toastError } from "@/components/shared/toast";
+import { SubmissionBinFolderSchema } from "@/lib/zod/submission-bin-folder";
 
 interface CreateNewSubmissionBinFolderProps {
     open: boolean;
@@ -23,17 +25,48 @@ export default function CreateNewSubmissionBinFolderModal({
 
     const [confirmOpen, setConfirmOpen] = useState(false);
 
+    // Schema for creation (omit id)
+    const createSchema = SubmissionBinFolderSchema.omit({ id: true });
+
     function handleSaveClick() {
        if (!binId || !folderName || !gdriveLink) return;
-        setConfirmOpen(true);
-    }
 
-    function confirmSave() {
-        onSave({
+        const payload = {
             binId,
             folderName: folderName.trim(),
             gdriveLink: gdriveLink.trim(),
-        });
+        };
+
+        const parsed = createSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: parsed.error.issues.map((i) => i.message).join("; "),
+            });
+            return;
+        }
+
+        setConfirmOpen(true);
+    }
+
+
+    function confirmSave() {
+        const payload = {
+            binId,
+            folderName: folderName.trim(),
+            gdriveLink: gdriveLink.trim(),
+        };
+
+        const parsed = createSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: parsed.error.issues.map((i) => i.message).join("; "),
+            });
+            return;
+        }
+
+        onSave(parsed.data);
 
         resetForm();
         setConfirmOpen(false);

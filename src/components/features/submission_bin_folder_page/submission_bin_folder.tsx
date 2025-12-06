@@ -1,4 +1,5 @@
 "use client";
+import { SubmissionBinFolderSchema } from "@/lib/zod/submission-bin-folder";
 
 import React, { useEffect, useState } from "react";
 import { ContentContainer } from "@/components/layout/ContentContainer";
@@ -71,11 +72,15 @@ export default function SubmissionBinFolder() {
 
     const handleAddSubmissionBinFolder = async (data: { binId: number, folderName: string, gdriveLink: string }) => {
         try {
-            await createSubmissionBinFolder.mutateAsync({
-                binId: data.binId,
-                folderName: data.folderName,
-                gdriveLink: data.gdriveLink,
-            });
+            // Validate incoming data with Zod (omit id)
+            const createSchema = SubmissionBinFolderSchema.omit({ id: true });
+            const parsed = createSchema.safeParse(data);
+            if (!parsed.success) {
+                toastError({ title: 'Invalid input', description: 'Only Google Drive Folder link is allowed. Please check your input and try again.' });
+                return;
+            }
+
+            await createSubmissionBinFolder.mutateAsync(parsed.data);
             toastSuccess({
                 title: "Submission bin folder created",
                 description: "Your new submission bin folder has been saved.",
@@ -94,12 +99,25 @@ export default function SubmissionBinFolder() {
         if (!selectedSubmissionBinFolder) return;
 
         try {
-        await updateSubmissionBinFolder.mutateAsync({
+        const payload = {
             id: selectedSubmissionBinFolder.id,
+            binId: data.binId,
+            folderName: data.folderName,
+            gdriveLink: data.gdriveLink,
+        };
+
+        const parsed = SubmissionBinFolderSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({ title: 'Invalid input', description: parsed.error.issues.map(i => i.message).join('; ') });
+            return;
+        }
+
+        await updateSubmissionBinFolder.mutateAsync({
+            id: Number(parsed.data.id),
             dto: {
-                binId: data.binId,
-                folderName: data.folderName,
-                gdriveLink: data.gdriveLink,
+                binId: parsed.data.binId,
+                folderName: parsed.data.folderName,
+                gdriveLink: parsed.data.gdriveLink,
             },
         });
         toastSuccess({

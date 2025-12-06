@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { SquarePen } from "lucide-react";
 import { useEffect, useState } from "react";
 import ActionModal from "@/components/features/action_modal";
+import { toastError } from "@/components/shared/toast";
+import { SubmissionBinFolderSchema } from "@/lib/zod/submission-bin-folder";
 
 interface EditSubmissionBinFolderModalProps {
     open: boolean;
@@ -40,18 +42,31 @@ export default function EditSubmissionBinFolderModal({
     // Show confirmation modal first
     function handleSaveClick() {
         if (!folderName || !gdriveLink) return; 
+
+        // Lightweight presence check; full validation happens in confirmUpdate via Zod
         setConfirmOpen(true);
     }
 
     // After confirming:
     function confirmUpdate() {
-        if (!folderName || !gdriveLink) return;
-        onUpdate({
-            id: submissionBinFolder!.id,
-            binId: submissionBinFolder!.binId,
-            folderName,
-            gdriveLink,
-        });
+        if (!submissionBinFolder) return;
+        const payload = {
+            id: submissionBinFolder.id,
+            binId: submissionBinFolder.binId,
+            folderName: folderName.trim(),
+            gdriveLink: gdriveLink.trim(),
+        };
+
+        const parsed = SubmissionBinFolderSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: 'Only Google Drive Folder link is allowed. Please check your input and try again.',
+            });
+            return;
+        }
+
+        onUpdate(parsed.data);
 
         setConfirmOpen(false);
         onClose();
