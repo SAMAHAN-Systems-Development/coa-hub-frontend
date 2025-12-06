@@ -39,7 +39,7 @@ export default function ActionModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-full !max-w-[50vw] sm:max-w-[1100px] rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
+        className="w-full !max-w-[90vw] lg:!max-w-[60vw] rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
         style={{
           background: "linear-gradient(225deg, #6C7178 0%, #373C44 100%)",
         }}
@@ -62,7 +62,7 @@ export default function ActionModal({
               tone="glass" 
               size="lg"
               rounded="lg"
-              className="min-w-[150px] text-lg"
+              className="min-w-[150px] text-sm md:text-base lg:text-lg"
             >
               {confirmText}
             </SharedButton>
@@ -74,7 +74,7 @@ export default function ActionModal({
               tone="glass"
               size="lg"
               rounded="lg"
-              className="min-w-[150px] text-lg"
+              className="min-w-[150px] text-sm md:text-base lg:text-lg"
             >
               {cancelText}
             </SharedButton>
