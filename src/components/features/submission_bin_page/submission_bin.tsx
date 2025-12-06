@@ -250,7 +250,9 @@ export default function SubmissionBinPage() {
                                 >
                                 <button
                                     className="w-full text-left px-3 py-2 text-sm text-white hover:bg-white/10 flex items-center gap-2"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
                                         setSelectedSubmissionBin(bin);
                                         setEditModalOpen(true);
                                         setOpenMenuId(null);
@@ -260,7 +262,9 @@ export default function SubmissionBinPage() {
                                 </button>
                                 <button
                                     className="w-full text-left px-3 py-2 text-sm text-red-300 hover:bg-red-500/10 flex items-center gap-2"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
                                         setSelectedSubmissionBin(bin);
                                         setDeleteModalOpen(true);
                                         setOpenMenuId(null);
