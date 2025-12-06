@@ -8,8 +8,8 @@ import InputImage from "@/components/members-page/input-image";
 import GeneralModal from "@/components/members-page/general-modal";
 import { SharedButton } from "@/components/shared/SharedButton";
 import Image from "next/image";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { memberSchema, type MemberFormData } from "@/lib/zod/member.schema";
 import { useMemberForm } from "@/hooks/useMemberForm";
 import { useCreateMemberMutation } from "@/lib/api/mutations/membersMutations";
@@ -20,13 +20,20 @@ type ModalVariant = "create" | "cancel-create";
 
 export default function AddMembers() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Form state
   const [memberImage, setMemberImage] = useState<File | null>(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [name, setName] = useState("");
   const [position, setPosition] = useState("");
   const [email, setEmail] = useState("");
+  const [categoryId, setCategoryId] = useState<number>(1);
+
+  useEffect(() => {
+    const categoryIdParam = searchParams.get("categoryId");
+    if (categoryIdParam) {
+      setCategoryId(parseInt(categoryIdParam, 10));
+    }
+  }, [searchParams]);
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -44,8 +51,7 @@ export default function AddMembers() {
 
   const handleSaveClick = () => {
     const isValid = validateForm({
-      firstName,
-      lastName,
+      name,
       position,
       email,
       image: memberImage || undefined,
@@ -64,26 +70,18 @@ export default function AddMembers() {
 
   const handleConfirmSave = async () => {
     try {
-      // Validate required fields that aren't in the current form
-      if (!position) {
-        toast.error(
-          "Position is required but will be used as categoryId temporarily"
-        );
-        return;
-      }
-
       await createMutation.mutateAsync({
-        firstName,
-        lastName,
+        name,
+        position,
         email,
-        categoryId: position, //temporary
-        year: new Date().getFullYear(),
+        categoryId,
         imageUrl: undefined,
       });
 
       setModalOpen(false);
       router.push("/admin/members");
     } catch (error) {
+      console.error("Error creating member:", error);
       setModalOpen(false);
     }
   };
@@ -122,27 +120,14 @@ export default function AddMembers() {
                 <InputImage onImageChange={handleImageChange} />
               </InputContainer>
               <Spacer />
-              <InputContainer title="First Name">
+              <InputContainer title="Name">
                 <InputTextField
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Enter First Name..."
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter Full Name..."
                 />
-                {errors.firstName && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.firstName}
-                  </p>
-                )}
-              </InputContainer>
-              <Spacer />
-              <InputContainer title="Last Name">
-                <InputTextField
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Enter Last Name..."
-                />
-                {errors.lastName && (
-                  <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>
+                {errors.name && (
+                  <p className="text-red-400 text-sm mt-1">{errors.name}</p>
                 )}
               </InputContainer>
               <Spacer />

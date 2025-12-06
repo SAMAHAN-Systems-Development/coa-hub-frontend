@@ -1,5 +1,9 @@
 import { api } from "./apiClient";
-import { Member, PaginatedResponse } from "@/lib/types/entities/member";
+import {
+  Member,
+  PaginatedResponse,
+  CategoryWithMembers,
+} from "@/lib/types/entities/member";
 import {
   CreateMemberRequest,
   UpdateMemberRequest,
@@ -12,8 +16,8 @@ export const membersApi = {
     if (params?.page) queryParams.append("page", params.page.toString());
     if (params?.limit) queryParams.append("limit", params.limit.toString());
     if (params?.search) queryParams.append("search", params.search);
-    if (params?.categoryId) queryParams.append("categoryId", params.categoryId);
-    if (params?.year) queryParams.append("year", params.year.toString());
+    if (params?.categoryId)
+      queryParams.append("categoryId", params.categoryId.toString());
 
     const queryString = queryParams.toString();
     return api.get<PaginatedResponse<Member>>(
@@ -22,6 +26,8 @@ export const membersApi = {
   },
 
   getById: (id: string) => api.get<Member>(`/members/${id}`),
+
+  getGrouped: () => api.get<CategoryWithMembers[]>("/members/grouped"),
 
   create: (data: CreateMemberRequest) => api.post<Member>("/members", data),
 

@@ -1,18 +1,16 @@
 export interface CreateMemberRequest {
-  firstName: string;
-  lastName: string;
+  name: string;
+  position: string;
   email: string;
-  categoryId: string;
-  year: number;
+  categoryId: number;
   imageUrl?: string;
 }
 
 export interface UpdateMemberRequest {
-  firstName?: string;
-  lastName?: string;
+  name?: string;
+  position?: string;
   email?: string;
-  categoryId?: string;
-  year?: number;
+  categoryId?: number;
   imageUrl?: string;
 }
 
@@ -20,8 +18,7 @@ export interface GetMembersRequest {
   page?: number;
   limit?: number;
   search?: string;
-  categoryId?: string;
-  year?: number;
+  categoryId?: number;
 }
 
 export interface CreateMemberCategoryRequest {

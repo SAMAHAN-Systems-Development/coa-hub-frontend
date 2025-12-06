@@ -1,20 +1,21 @@
 export interface Member {
-  id: string;
-  firstName: string;
-  lastName: string;
+  id: number;
+  name: string;
+  position: string;
   email: string;
-  categoryId: string;
-  year: number;
+  categoryId: number;
   imageUrl?: string;
   createdAt: string;
-  updatedAt: string;
+  modifiedAt: string;
+  deletedAt: string | null;
 }
 
 export interface MemberCategory {
-  id: string;
+  id: number;
   name: string;
   createdAt: string;
-  updatedAt: string;
+  modifiedAt: string;
+  deletedAt: string | null;
 }
 
 export interface PaginatedResponse<T> {
@@ -25,4 +26,10 @@ export interface PaginatedResponse<T> {
     limit: number;
     totalPages: number;
   };
+}
+
+export interface CategoryWithMembers {
+  category: string;
+  categoryId: number;
+  members: Member[];
 }

@@ -18,3 +18,11 @@ export function useMemberQuery(id: string) {
     enabled: !!id,
   });
 }
+
+export function useGroupedMembersQuery() {
+  return useQuery({
+    queryKey: ["members", "grouped"],
+    queryFn: () => membersApi.getGrouped(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}

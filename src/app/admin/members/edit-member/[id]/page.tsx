@@ -9,9 +9,13 @@ import InputChips from "@/components/members-page/input-chips";
 import GeneralModal from "@/components/members-page/general-modal";
 import { SharedButton } from "@/components/shared/SharedButton";
 import Image from "next/image";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useMemberQuery } from "@/lib/api/queries/membersQueries";
+import { useUpdateMemberMutation } from "@/lib/api/mutations/membersMutations";
+import { FullScreenLoader } from "@/components/shared/loading-spinner";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
   editMemberSchema,
   type EditMemberFormData,
@@ -22,37 +26,41 @@ type ModalVariant = "edit" | "cancel-edit";
 
 export default function EditMember() {
   const router = useRouter();
+  const params = useParams();
+  const memberId = params.id as string;
 
-  // Mock data - replace with actual data
+  const { data: member, isLoading, error } = useMemberQuery(memberId);
+  const updateMutation = useUpdateMemberMutation();
+
   const [memberImage, setMemberImage] = useState<File | null>(null);
-  const [fullName, setFullName] = useState("John Doe");
-  const [position, setPosition] = useState("President");
-  const [designations, setDesignations] = useState<string[]>([
-    "Department",
-    "Independent Bodies",
-  ]);
-  const [email, setEmail] = useState("jd@addu.edu.ph");
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [name, setName] = useState("");
+  const [position, setPosition] = useState("");
+  const [email, setEmail] = useState("");
 
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [modalVariant, setModalVariant] = useState<ModalVariant>("edit");
 
-  // Custom hooks
   const { errors, validateForm } = useMemberForm({
     schema: editMemberSchema,
   });
+
+  useEffect(() => {
+    if (member) {
+      setName(member.name);
+      setPosition(member.position);
+      setEmail(member.email);
+      setImageUrl(member.imageUrl);
+    }
+  }, [member]);
 
   const handleImageChange = (file: File | null) => {
     setMemberImage(file);
   };
 
-  const handleDesignationsChange = (updatedDesignations: string[]) => {
-    setDesignations(updatedDesignations);
-  };
-
   const handleSaveClick = () => {
     const isValid = validateForm({
-      fullName,
+      name,
       position,
       email,
       image: memberImage || undefined,
@@ -69,21 +77,49 @@ export default function EditMember() {
     setModalOpen(true);
   };
 
-  const handleConfirmSave = () => {
-    // temporary implement patch req
-    console.log("Updating member...", {
-      memberImage,
-      fullName,
-      position,
-      designations,
-      email,
-    });
-    setModalOpen(false);
+  const handleConfirmSave = async () => {
+    try {
+      await updateMutation.mutateAsync({
+        id: memberId,
+        data: {
+          name,
+          position,
+          email,
+          imageUrl,
+        },
+      });
+      setModalOpen(false);
+      router.push("/admin/members");
+    } catch (error) {
+      console.error("Error updating member:", error);
+      setModalOpen(false);
+    }
   };
 
   const handleConfirmCancel = () => {
     router.push("/admin/members");
   };
+
+  if (isLoading) {
+    return (
+      <ProtectedRoute requireAdmin>
+        <FullScreenLoader label="Loading member..." />
+      </ProtectedRoute>
+    );
+  }
+
+  if (error || !member) {
+    return (
+      <ProtectedRoute requireAdmin>
+        <div className="min-h-screen w-full py-8 px-6">
+          <EmptyState
+            title="Error loading member"
+            description="Failed to load member data. Please try again."
+          />
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute requireAdmin>
@@ -113,19 +149,19 @@ export default function EditMember() {
             <div>
               <InputContainer title="Image">
                 <InputImage
-                  existingImage="/path/to/existing/image.jpg"
+                  existingImage={member.imageUrl}
                   onImageChange={handleImageChange}
                 />
               </InputContainer>
               <Spacer />
-              <InputContainer title="Full Name">
+              <InputContainer title="Name">
                 <InputTextField
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="Enter Full Name..."
                 />
-                {errors.fullName && (
-                  <p className="text-red-400 text-sm mt-1">{errors.fullName}</p>
+                {errors.name && (
+                  <p className="text-red-400 text-sm mt-1">{errors.name}</p>
                 )}
               </InputContainer>
               <Spacer />
@@ -142,8 +178,8 @@ export default function EditMember() {
               <Spacer />
               <InputContainer title="Designation">
                 <InputChips
-                  initialChips={designations}
-                  onChange={handleDesignationsChange}
+                  initialChips={[]}
+                  onChange={(chips) => console.log(chips)}
                 />
               </InputContainer>
               <Spacer />
@@ -165,13 +201,15 @@ export default function EditMember() {
                   tone="mid"
                   size="lg"
                   onClick={handleSaveClick}
+                  disabled={updateMutation.isPending}
                 >
-                  Save
+                  {updateMutation.isPending ? "Saving..." : "Save"}
                 </SharedButton>
                 <SharedButton
                   variant="secondary"
                   size="lg"
                   onClick={handleCancelClick}
+                  disabled={updateMutation.isPending}
                 >
                   Cancel
                 </SharedButton>
