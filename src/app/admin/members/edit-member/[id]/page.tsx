@@ -91,7 +91,6 @@ export default function EditMember() {
       setModalOpen(false);
       router.push("/admin/members");
     } catch (error) {
-      console.error("Error updating member:", error);
       setModalOpen(false);
     }
   };

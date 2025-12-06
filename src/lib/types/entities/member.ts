@@ -13,6 +13,7 @@ export interface Member {
 export interface MemberCategory {
   id: number;
   name: string;
+  priority_number?: number;
   createdAt: string;
   modifiedAt: string;
   deletedAt: string | null;
@@ -31,5 +32,6 @@ export interface PaginatedResponse<T> {
 export interface CategoryWithMembers {
   category: string;
   categoryId: number;
+  priorityNumber?: number;
   members: Member[];
 }

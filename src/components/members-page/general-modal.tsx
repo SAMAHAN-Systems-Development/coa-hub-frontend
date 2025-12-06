@@ -14,7 +14,12 @@ type ModalVariant =
   | "edit"
   | "delete"
   | "cancel-create"
-  | "cancel-edit";
+  | "cancel-edit"
+  | "create-category"
+  | "edit-category"
+  | "delete-category"
+  | "cancel-create-category"
+  | "cancel-edit-category";
 
 interface GeneralModalProps {
   isOpen: boolean;
@@ -65,6 +70,51 @@ const modalConfig = {
     title: "CANCEL EDITING MEMBER?",
     description:
       "Are you sure you want to cancel editing this member? New information will not be saved",
+    confirmText: "Cancel",
+    cancelText: "Go Back",
+    confirmVariant: "secondary" as const,
+    confirmTone: undefined,
+  },
+  "create-category": {
+    title: "CREATE NEW CATEGORY?",
+    description:
+      "Are you sure you want to save the new category? Information will be saved.",
+    confirmText: "Save",
+    cancelText: "Go Back",
+    confirmVariant: "primary" as const,
+    confirmTone: "mid" as const,
+  },
+  "edit-category": {
+    title: "EDIT CATEGORY?",
+    description:
+      "Are you sure you want to edit this category? Information will be saved.",
+    confirmText: "Save",
+    cancelText: "Go Back",
+    confirmVariant: "primary" as const,
+    confirmTone: "mid" as const,
+  },
+  "delete-category": {
+    title: "DELETE CATEGORY?",
+    description: (name: string) =>
+      `Are you sure you want to permanently delete ${name} category? This cannot be undone.`,
+    confirmText: "Delete",
+    cancelText: "Cancel",
+    confirmVariant: "danger" as const,
+    confirmTone: undefined,
+  },
+  "cancel-create-category": {
+    title: "CANCEL ADDING NEW CATEGORY?",
+    description:
+      "Are you sure you want to cancel adding new category? New information will not be saved",
+    confirmText: "Cancel",
+    cancelText: "Go Back",
+    confirmVariant: "secondary" as const,
+    confirmTone: undefined,
+  },
+  "cancel-edit-category": {
+    title: "CANCEL EDITING CATEGORY?",
+    description:
+      "Are you sure you want to cancel editing this category? New information will not be saved",
     confirmText: "Cancel",
     cancelText: "Go Back",
     confirmVariant: "secondary" as const,
