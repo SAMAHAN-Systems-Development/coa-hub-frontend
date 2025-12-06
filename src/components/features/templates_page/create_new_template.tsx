@@ -3,7 +3,9 @@ import { SharedButton } from "../../shared/SharedButton";
 import { Input } from "@/components/ui/input";
 import { ImageIcon, Plus } from "lucide-react";
 import { useState } from "react";
-import ActionModal from "@/components/features/action_modal"; 
+import ActionModal from "@/components/features/action_modal";
+import { TemplateSchema } from "@/lib/zod/templates";
+import { toastError } from "@/components/shared/toast"; 
 
 interface CreateNewTemplateProps {
     open: boolean;
@@ -20,17 +22,44 @@ export default function CreateNewTemplateModal({
     const [gdriveLink, setGDriveLink] = useState("");
 
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const createSchema = TemplateSchema.omit({ id: true });
 
     function handleSaveClick() {
-        if (!name  || !gdriveLink) return;
+        if (!name || !gdriveLink) return;
+
+        const payload = {
+            name: name.trim(),
+            gdriveLink: gdriveLink.trim(),
+        };
+
+        const parsed = createSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: parsed.error.issues.map((i) => i.message).join("; "),
+            });
+            return;
+        }
+
         setConfirmOpen(true);
     }
 
     function confirmSave() {
-        onSave({
-            name,
-            gdriveLink,
-        });
+        const payload = {
+            name: name.trim(),
+            gdriveLink: gdriveLink.trim(),
+        };
+
+        const parsed = createSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: parsed.error.issues.map((i) => i.message).join("; "),
+            });
+            return;
+        }
+
+        onSave(parsed.data);
 
         resetForm();
         setConfirmOpen(false);
@@ -54,23 +83,23 @@ export default function CreateNewTemplateModal({
                 }}
             >
                 <DialogContent
-                    className="w-full !max-w-[1200px] !max-h-[900px] rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
+                    className="w-full !max-w-[1200px] max-h-full overflow-y-auto rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
                     style={{
                     background: "linear-gradient(225deg, #6C7178 0%, #373C44 100%)",
                     }}
                 >
                     {/* HEADER */}
                     <DialogHeader>
-                    <div className="flex items-center gap-3">
-                        <Plus size={36} />
-                        <DialogTitle className="text-5xl font-bebas-neue font-medium tracking-wide">
-                        CREATE NEW TEMPLATE
+                    <div className="mt-3 flex items-center gap-3">
+                        <Plus className="w-7 h-7 md:w-11 md:h-11" />
+                        <DialogTitle className="text-4xl md:text-5xl font-bebas-neue font-medium tracking-wide">
+                            CREATE NEW TEMPLATE
                         </DialogTitle>
                     </div>
                     </DialogHeader>
 
                     {/* FORM */}
-                    <div className="mt-8 space-y-6">
+                    <div className="mt-2 md:mt-8 space-y-6 pb-10 lg:pb-0">
                         {/* Subject */}
                         <div
                         className="
@@ -82,7 +111,7 @@ export default function CreateNewTemplateModal({
                             background: "linear-gradient(90deg, rgba(120,125,133,0.65), rgba(55,60,68,0.90))",
                         }}
                         >
-                        <label className="text-white text-xl font-medium">Subject</label>
+                        <label className="text-white text-base md:text-xl font-medium">Subject</label>
 
                         <Input
                             placeholder="Add Subject"
@@ -90,7 +119,7 @@ export default function CreateNewTemplateModal({
                             onChange={(e) => setName(e.target.value)}
                             className="
                             bg-[#E6E9EE] 
-                            text-gray-700 
+                            text-gray-700 text-xs sm:text-sm md:text-xl
                             placeholder:text-gray-500 
                             rounded-xl 
                             h-12
@@ -111,7 +140,7 @@ export default function CreateNewTemplateModal({
                                 background: "linear-gradient(90deg, rgba(120,125,133,0.65), rgba(55,60,68,0.90))",
                             }}
                         >
-                            <label className="text-white text-xl font-medium">Google Drive Link</label>
+                            <label className="text-white text-base md:text-xl font-medium">Google Drive Link</label>
 
                             <Input
                                 placeholder="Paste Google Drive link"
@@ -119,7 +148,7 @@ export default function CreateNewTemplateModal({
                                 onChange={(e) => setGDriveLink(e.target.value)}
                                 className="
                                     bg-[#E6E9EE] 
-                                    text-gray-700 
+                                    text-gray-700 text-xs sm:text-sm md:text-xl
                                     placeholder:text-gray-500 
                                     rounded-xl 
                                     h-12
@@ -131,13 +160,13 @@ export default function CreateNewTemplateModal({
                     </div>
 
                     {/* FOOTER BUTTONS */}
-                    <DialogFooter className="mt-8 flex justify-end gap-4">
+                    <DialogFooter className="mt-1 md:mt-8 flex flex-row justify-end gap-4">
                         <SharedButton
                             onClick={handleSaveClick}
                             size="lg"
                             rounded="lg"
                             tone="glass"
-                            className="min-w-[130px]"
+                            className="h-11 !px-6 !text-sm sm:!px-10 sm:!text-base md:min-w-[130px] md:!text-base"
                         >
                             Save
                         </SharedButton>
@@ -150,7 +179,7 @@ export default function CreateNewTemplateModal({
                             size="lg"
                             rounded="lg"
                             tone="glass"
-                            className="min-w-[130px]"
+                            className="h-11 !px-6 !text-sm sm:!px-10 sm:!text-base md:min-w-[130px] md:!text-base"
                         >
                             Cancel
                         </SharedButton>
