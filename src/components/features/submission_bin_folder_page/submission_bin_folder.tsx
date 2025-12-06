@@ -16,6 +16,7 @@ import { useSubmissionBinQuery } from "@/lib/api/queries/use-submission-bins";
 import { useCreateSubmissionBinFolderMutation, useUpdateSubmissionBinFolderMutation, useDeleteSubmissionBinFolderMutation } from "@/lib/api/mutations/submission-bin-folders.mutation";
 import { SkeletonCard } from "@/components/shared/loading-skeleton";
 import { toastError, toastSuccess } from "@/components/shared/toast";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function SubmissionBinFolder() {
     const { isAdmin } = useAuth();  
@@ -186,6 +187,7 @@ export default function SubmissionBinFolder() {
 
     return (
         <div>
+            <ProtectedRoute>
             {/* Header */}
             <div className="text-center w-full mb-10 py-50 rounded-b-2xl lg:rounded-b-4xl"
                 style={{
@@ -438,6 +440,7 @@ export default function SubmissionBinFolder() {
             onConfirm={handleDelete}
             destructive={true}
         />
+        </ProtectedRoute>
         </div>
     );
 }
