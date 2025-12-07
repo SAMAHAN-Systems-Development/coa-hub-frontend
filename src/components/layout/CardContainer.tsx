@@ -27,7 +27,7 @@ export const CardContainer: React.FC<CardContainerProps> = ({
   onActionClick,
 }) => (
   <div
-    className={`rounded-md flex flex-col items-center p-3 w-full max-w-[299px] min-h-[400px] mx-auto ${className}`}
+    className={`rounded-md flex flex-col items-center p-2 md:p-3 w-full max-w-[180px] md:max-w-[299px] min-h-[260px] md:min-h-[400px] mx-auto ${className}`}
   >
     <div className="relative w-full">
       {imageSrc ? (
@@ -36,28 +36,28 @@ export const CardContainer: React.FC<CardContainerProps> = ({
           alt={imageAlt}
           width={299}
           height={382}
-          className="w-full h-[382px] shadow-2xl rounded-sm object-cover mb-2"
+          className="w-full h-[230px] md:h-[382px] shadow-lg md:shadow-2xl rounded-sm object-cover mb-1.5 md:mb-2"
         />
       ) : (
-        <div className="w-full h-[382px] rounded-sm bg-gray-100 border border-gray-300 mb-2 shadow-2xl" />
+        <div className="w-full h-[230px] md:h-[382px] rounded-sm bg-gray-100 border border-gray-300 mb-1.5 md:mb-2 shadow-lg md:shadow-2xl" />
       )}
 
       {adminAction && (
         <button
           onClick={onActionClick}
-          className="absolute top-3 left-3 hover:opacity-80 transition-opacity"
+          className="absolute top-2 md:top-3 left-2 md:left-3 hover:opacity-80 transition-opacity"
           aria-label={adminAction === "edit" ? "Edit member" : "Delete member"}
         >
           {adminAction === "edit" ? (
-            <Pencil className="w-6 h-6 text-gray-800" />
+            <Pencil className="w-4 h-4 md:w-6 md:h-6 text-gray-800" />
           ) : (
-            <Trash2 className="w-6 h-6 text-gray-800" />
+            <Trash2 className="w-4 h-4 md:w-6 md:h-6 text-gray-800" />
           )}
         </button>
       )}
     </div>
 
-    <div className="text-center space-y-0.5 text-sm leading-tight">
+    <div className="text-center space-y-0 md:space-y-0.5 text-xs md:text-sm leading-tight">
       {children}
     </div>
   </div>

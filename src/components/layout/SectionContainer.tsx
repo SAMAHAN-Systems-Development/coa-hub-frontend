@@ -43,8 +43,8 @@ export const SectionContainer: React.FC<SectionContainerProps> = ({
               <div
                 className={
                   index === 0 && firstCardFullWidth
-                    ? "w-full m-3"
-                    : "w-[300px] m-3"
+                    ? "w-full m-2 md:m-3"
+                    : "w-[180px] md:w-[300px] m-2 md:m-3"
                 }
               >
                 {child}
