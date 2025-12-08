@@ -55,13 +55,17 @@ const BackButton = ({ onClick }: { onClick: () => void }) => (
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loginMode, setLoginMode] = useState<"select" | "google" | "admin">(
-    "select"
-  );
   const [isLoading, setIsLoading] = useState(false);
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  // Show admin login option only when accessing from /admin routes
+  const isAdminLogin = callbackUrl.startsWith("/admin");
+
+  const [loginMode, setLoginMode] = useState<"select" | "google" | "admin">(
+    isAdminLogin ? "select" : "google"
+  );
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -127,8 +131,8 @@ export default function LoginPage() {
           </h1>
         </div>
 
-        {/* Selection Screen */}
-        {loginMode === "select" && (
+        {/* Selection Screen - Only shown for admin routes */}
+        {loginMode === "select" && isAdminLogin && (
           <div className="space-y-4">
             <p className="text-center text-gray-600 mb-8">
               Choose how you want to sign in
@@ -158,7 +162,7 @@ export default function LoginPage() {
         {/* Google Sign In */}
         {loginMode === "google" && (
           <div className="space-y-6">
-            <BackButton onClick={() => setLoginMode("select")} />
+            {isAdminLogin && <BackButton onClick={() => setLoginMode("select")} />}
 
             <div className="text-center mb-8">
               <p className="text-gray-700 mb-2">Sign in with Google</p>
