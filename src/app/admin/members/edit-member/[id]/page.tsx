@@ -8,7 +8,7 @@ import InputImage from "@/components/members-page/input-image";
 import InputChips from "@/components/members-page/input-chips";
 import GeneralModal from "@/components/members-page/general-modal";
 import { SharedButton } from "@/components/shared/SharedButton";
-import Image from "next/image";
+import { Pencil } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -135,13 +135,7 @@ export default function EditMember() {
               className="text-2xl md:text-5xl font-bebas-neue uppercase flex items-center mb-4"
               style={{ color: "#E7EAEF" }}
             >
-              <Image
-                src="/images/members/edit-symbol.png"
-                alt="Edit member icon"
-                width={24}
-                height={24}
-                className="w-5 h-5 md:w-8 md:h-8 mr-2 md:mr-3 mb-1"
-              />
+              <Pencil className="w-5 h-5 md:w-8 md:h-8 mr-2 md:mr-3" />
               EDIT MEMBER
             </h1>
             <Spacer size={8} />

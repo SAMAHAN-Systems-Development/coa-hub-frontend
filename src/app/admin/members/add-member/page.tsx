@@ -7,7 +7,7 @@ import InputTextField from "@/components/members-page/input-textfield";
 import InputImage from "@/components/members-page/input-image";
 import GeneralModal from "@/components/members-page/general-modal";
 import { SharedButton } from "@/components/shared/SharedButton";
-import Image from "next/image";
+import { Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { memberSchema, type MemberFormData } from "@/lib/zod/member.schema";
@@ -104,13 +104,7 @@ export default function AddMembers() {
               className="text-2xl md:text-5xl font-bebas-neue uppercase flex items-center mb-4"
               style={{ color: "#E7EAEF" }}
             >
-              <Image
-                src="/images/members/add-symbol.png"
-                alt="Add member icon"
-                width={24}
-                height={24}
-                className="w-5 h-5 md:w-8 md:h-8 mr-2 md:mr-3 mb-1"
-              />
+              <Plus className="w-5 h-5 md:w-8 md:h-8 mr-2 md:mr-3" />
               ADD MEMBER
             </h1>
             <Spacer size={8} />
