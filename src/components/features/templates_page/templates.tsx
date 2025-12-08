@@ -15,6 +15,7 @@ import { useCreateTemplateMutation, useUpdateTemplateMutation, useDeleteTemplate
 import { SkeletonCard } from "@/components/shared/loading-skeleton";
 import { toastError, toastSuccess } from "@/components/shared/toast";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { TemplateSchema } from "@/lib/zod/templates";
 
 export default function TemplatesPage() {
   
@@ -100,10 +101,14 @@ export default function TemplatesPage() {
 
   const handleAddTemplate = async (data: { name: string; gdriveLink: string }) => {
       try {
-          await createTemplate.mutateAsync({
-              name: data.name,
-              gdriveLink: data.gdriveLink,
-          });
+          const createSchema = TemplateSchema.omit({ id: true });
+          const parsed = createSchema.safeParse(data);
+          if (!parsed.success) {
+              toastError({ title: 'Invalid input', description: parsed.error.issues.map(i => i.message).join('; ') });
+              return;
+          }
+
+          await createTemplate.mutateAsync(parsed.data);
           toastSuccess({
               title: "Template created",
               description: "Your new template has been saved.",
@@ -122,24 +127,36 @@ export default function TemplatesPage() {
       if (!selectedTemplate) return;
 
       try {
-      await updateTemplate.mutateAsync({
-          id: selectedTemplate.id,
-          dto: {
-          name: data.name,
-          gdriveLink: data.gdriveLink,
-          },
-      });
-      toastSuccess({
-          title: "Template updated",
-          description: "Changes have been saved.",
-      });
-      setEditModalOpen(false);
+          const payload = {
+              id: selectedTemplate.id,
+              name: data.name,
+              gdriveLink: data.gdriveLink,
+          };
+
+          const parsed = TemplateSchema.safeParse(payload);
+          if (!parsed.success) {
+              toastError({ title: 'Invalid input', description: parsed.error.issues.map(i => i.message).join('; ') });
+              return;
+          }
+
+          await updateTemplate.mutateAsync({
+              id: Number(parsed.data.id),
+              dto: {
+                name: parsed.data.name,
+                gdriveLink: parsed.data.gdriveLink,
+              },
+          });
+          toastSuccess({
+              title: "Template updated",
+              description: "Changes have been saved.",
+          });
+          setEditModalOpen(false);
       } catch (err) {
-      console.error("Failed to update template:", err);
-      toastError({
-          title: "Failed to update template",
-          description: "Please try again.",
-      });
+          console.error("Failed to update template:", err);
+          toastError({
+              title: "Failed to update template",
+              description: "Please try again.",
+          });
       }
   };
 

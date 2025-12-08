@@ -8,6 +8,8 @@ import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { CalendarIcon } from "lucide-react"
+import { DeadlineSchema } from "@/lib/zod/deadline";
+import { toastError } from "@/components/shared/toast";
 
 interface CreateNewDeadlineProps {
     open: boolean;
@@ -24,17 +26,56 @@ export default function CreateNewDeadlineModal({
     const [dueDate, setDueDate] = useState<Date | null>(null)
     const [confirmOpen, setConfirmOpen] = useState(false);
 
+    const createSchema = DeadlineSchema.omit({ id: true });
+
     function handleSaveClick() {
-        if (!name  || !dueDate) return;
+        if (!name || !dueDate) return;
+
+        // Normalize date to midnight (local) before converting to ISO
+        const normalizedDate = new Date(dueDate);
+        normalizedDate.setHours(0, 0, 0, 0);
+
+        const payload = {
+            name: name.trim(),
+            dueDate: normalizedDate.toISOString(),
+        };
+
+        const parsed = createSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: parsed.error.issues.map((i) => i.message).join("; "),
+            });
+            return;
+        }
+
         setConfirmOpen(true);
     }
 
     function confirmSave() {
         if (!dueDate) return;
 
+        // Normalize date to midnight UTC before converting to ISO
+        const normalizedDate = new Date(dueDate);
+        normalizedDate.setUTCHours(0, 0, 0, 0);
+
+        const payload = {
+            name: name.trim(),
+            dueDate: normalizedDate.toISOString(),
+        };
+
+        const parsed = createSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: parsed.error.issues.map((i) => i.message).join("; "),
+            });
+            return;
+        }
+
         onSave({
-            name,
-            dueDate, // already a Date object
+            name: parsed.data.name,
+            dueDate,
         });
 
         resetForm();
@@ -59,23 +100,23 @@ export default function CreateNewDeadlineModal({
                 }}
             >
                 <DialogContent
-                    className="w-full h-full md:h-auto !max-w-[1200px] !max-h-[900px] rounded-xl p-10 text-white border border-white/10 !overflow-visible [&>button]:hidden"
+                    className="w-full !max-w-[1200px] max-h-full overflow-y-auto rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
                     style={{
                     background: "linear-gradient(225deg, #6C7178 0%, #373C44 100%)",
                     }}
                 >
                     {/* HEADER */}
                     <DialogHeader>
-                    <div className="mt-15 md:mt-3 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-3">
                         <Plus className="w-7 h-7 md:w-11 md:h-11" />
                         <DialogTitle className="text-4xl md:text-5xl font-bebas-neue font-medium tracking-wide">
-                        ADD NEW Deadline
+                            ADD NEW Deadline
                         </DialogTitle>
                     </div>
                     </DialogHeader>
 
                     {/* FORM */}
-                    <div className="mt-2 md:mt-8 space-y-6">
+                    <div className="mt-2 md:mt-8 space-y-6 pb-10 lg:pb-0">
                         {/* Title */}
                         <div
                         className="
@@ -136,6 +177,11 @@ export default function CreateNewDeadlineModal({
                                         selected={dueDate ?? undefined}
                                         onSelect={(date) => setDueDate(date ?? null)}
                                         initialFocus
+                                        disabled={(date) => {
+                                            const today = new Date();
+                                            today.setHours(0, 0, 0, 0);
+                                            return date < today;
+                                        }}
                                         className="
                                             rounded-md 
                                             w-[285px]
@@ -174,7 +220,7 @@ export default function CreateNewDeadlineModal({
                             rounded="lg"
                             tone="glass"
                             disabled={!name || !dueDate}
-                            className="h-11 !px-8 !text-sm sm:!px-12 sm:!text-base md:min-w-[130px] md:!text-base"
+                            className="h-11 !px-6 !text-sm sm:!px-10 sm:!text-base md:min-w-[130px] md:!text-base"
                         >
                             Save
                         </SharedButton>

@@ -10,6 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { DeadlineSchema } from "@/lib/zod/deadline";
+import { toastError } from "@/components/shared/toast";
 
 interface EditDeadlineModalProps {
     open: boolean;
@@ -37,22 +39,69 @@ export default function EditDeadlineModal({
     useEffect(() => {
         if (deadline) {
             setName(deadline.name);
-            setDueDate(deadline.dueDate);
+            // Ensure dueDate state is a Date instance even if the incoming
+            // `deadline.dueDate` is an ISO string from the API.
+            try {
+                setDueDate(deadline.dueDate ? new Date(deadline.dueDate as any) : null);
+            } catch (e) {
+                setDueDate(null);
+            }
         }
     }, [deadline, open]);
 
     // Show confirmation modal first
     function handleSaveClick() {
-        if (!dueDate) return; 
+        if (!dueDate) return;
+
+        // Normalize date to midnight (local) before converting to ISO
+        const normalizedDate = dueDate instanceof Date ? new Date(dueDate) : new Date(dueDate);
+        normalizedDate.setHours(0, 0, 0, 0);
+
+        const payload = {
+            id: deadline?.id || "",
+            name: name.trim(),
+            dueDate: normalizedDate.toISOString(),
+        };
+
+        const parsed = DeadlineSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: parsed.error.issues.map((i) => i.message).join("; "),
+            });
+            return;
+        }
+
         setConfirmOpen(true);
     }
 
     // After confirming:
     function confirmUpdate() {
         if (!deadline || !dueDate) return;
-        onUpdate({
+
+
+        // Normalize date to midnight (local) before converting to ISO
+        const normalizedDate = dueDate instanceof Date ? new Date(dueDate) : new Date(dueDate);
+        normalizedDate.setHours(0, 0, 0, 0);
+
+        const payload = {
             id: deadline.id,
-            name,
+            name: name.trim(),
+            dueDate: normalizedDate.toISOString(),
+        };
+
+        const parsed = DeadlineSchema.safeParse(payload);
+        if (!parsed.success) {
+            toastError({
+                title: "Invalid input",
+                description: parsed.error.issues.map((i) => i.message).join("; "),
+            });
+            return;
+        }
+
+        onUpdate({
+            id: parsed.data.id,
+            name: parsed.data.name,
             dueDate,
         });
 
@@ -64,12 +113,12 @@ export default function EditDeadlineModal({
         <>
             <Dialog open={open} onOpenChange={onClose}>
                 <DialogContent
-                    className="w-full h-full md:h-auto !max-w-[1000px] rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
+                    className="w-full !max-w-[1200px] max-h-full overflow-y-auto rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
                     style={{ background: "linear-gradient(225deg, #6C7178 0%, #373C44 100%)" }}
                 >
                     {/* HEADER */}
                     <DialogHeader>
-                        <div className="mt-15 md:mt-3 flex items-center gap-3">
+                        <div className="mt-3 flex items-center gap-3">
                             <SquarePen className="w-7 h-7 md:w-11 md:h-11" />
                             <DialogTitle className="text-4xl md:text-5xl font-bebas-neue font-medium tracking-wide">
                                 EDIT Deadline
@@ -78,7 +127,7 @@ export default function EditDeadlineModal({
                     </DialogHeader>
 
                     {/* FORM CONTENT */}
-                    <div className="mt-0 md:mt-8 space-y-6">
+                    <div className="mt-2 md:mt-8 space-y-6 pb-10 lg:pb-0">
 
                         {/* Subject */}
                         <div
@@ -132,6 +181,11 @@ export default function EditDeadlineModal({
                                         selected={dueDate ?? undefined}
                                         onSelect={(date) => setDueDate(date ?? null)}
                                         initialFocus
+                                        disabled={(date) => {
+                                            const today = new Date();
+                                            today.setHours(0, 0, 0, 0);
+                                            return date < today;
+                                        }}
                                         className="
                                             rounded-md 
                                             w-[285px]
@@ -169,7 +223,7 @@ export default function EditDeadlineModal({
                             size="lg" 
                             rounded="lg" 
                             tone="glass" 
-                            className="h-11 !px-8 !text-sm sm:!px-12 sm:!text-base md:min-w-[130px] md:!text-base"
+                            className="h-11 !px-6 !text-sm sm:!px-10 sm:!text-base md:min-w-[130px] md:!text-base"
                         >
                             Save
                         </SharedButton>

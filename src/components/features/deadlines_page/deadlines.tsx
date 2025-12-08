@@ -17,6 +17,7 @@ import { useCreateDeadlineMutation, useUpdateDeadlineMutation, useDeleteDeadline
 import { SkeletonCard } from "@/components/shared/loading-skeleton";
 import { toastError, toastSuccess } from "@/components/shared/toast";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { DeadlineSchema } from "@/lib/zod/deadline";
 
 export default function DeadlinesPage() {
 
@@ -58,9 +59,26 @@ export default function DeadlinesPage() {
 
     const handleAddDeadline = async (data: { name: string; dueDate: Date }) => {
         try {
-            await createDeadline.mutateAsync({
+            // Validate with Zod (omit id)
+            const createSchema = DeadlineSchema.omit({ id: true });
+            // Convert selected local Date into a UTC-midnight ISO string so
+            // the stored date represents the selected calendar day regardless
+            // of client timezone.
+            const d = data.dueDate;
+            const utcIso = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString();
+
+            const parsed = createSchema.safeParse({
                 name: data.name,
-                dueDate: data.dueDate.toISOString(),
+                dueDate: utcIso,
+            });
+            if (!parsed.success) {
+                toastError({ title: 'Invalid input', description: parsed.error.issues.map(i => i.message).join('; ') });
+                return;
+            }
+
+            await createDeadline.mutateAsync({
+                name: parsed.data.name,
+                dueDate: parsed.data.dueDate,
             });
             toastSuccess({
                 title: "Deadline created",
@@ -80,24 +98,42 @@ export default function DeadlinesPage() {
         if (!selectedRow) return;
 
         try {
-        await updateDeadline.mutateAsync({
-            id: selectedRow.id,
-            dto: {
-            name: data.name,
-            dueDate: data.dueDate.toISOString(),
-            },
-        });
-        toastSuccess({
-            title: "Deadline updated",
-            description: "Changes have been saved.",
-        });
-        setEditModalOpen(false);
+            // Convert selected local Date into a UTC-midnight ISO string so
+            // the stored date represents the selected calendar day regardless
+            // of client timezone.
+            const ud = data.dueDate;
+            const utcIsoUpdate = new Date(Date.UTC(ud.getFullYear(), ud.getMonth(), ud.getDate())).toISOString();
+
+            const payload = {
+                id: selectedRow.id,
+                name: data.name,
+                dueDate: utcIsoUpdate,
+            };
+
+            const parsed = DeadlineSchema.safeParse(payload);
+            if (!parsed.success) {
+                toastError({ title: 'Invalid input', description: parsed.error.issues.map(i => i.message).join('; ') });
+                return;
+            }
+
+            await updateDeadline.mutateAsync({
+                id: Number(parsed.data.id),
+                dto: {
+                    name: parsed.data.name,
+                    dueDate: parsed.data.dueDate,
+                },
+            });
+            toastSuccess({
+                title: "Deadline updated",
+                description: "Changes have been saved.",
+            });
+            setEditModalOpen(false);
         } catch (err) {
-        console.error("Failed to update deadline:", err);
-        toastError({
-            title: "Failed to update deadline",
-            description: "Please try again.",
-        });
+            console.error("Failed to update deadline:", err);
+            toastError({
+                title: "Failed to update deadline",
+                description: "Please try again.",
+            });
         }
     };
 
@@ -204,7 +240,20 @@ export default function DeadlinesPage() {
                                     "
                                     style={{ background: "#F5F5F5"}}
                                 >
-                                    {format(new Date(row.dueDate), "MMM d, yyyy")}
+                                    {(() => {
+                                        try {
+                                            if (!row?.dueDate) return "";
+                                            const d = new Date(row.dueDate);
+                                            // Build a local Date using the UTC year/month/date so
+                                            // the displayed day matches the original selected day
+                                            const displayDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+                                            // Convert that UTC-based timestamp into a local Date with the same Y/M/D
+                                            const localDisplay = new Date(displayDate.getUTCFullYear(), displayDate.getUTCMonth(), displayDate.getUTCDate());
+                                            return format(localDisplay, "MMM d, yyyy");
+                                        } catch (e) {
+                                            return "";
+                                        }
+                                    })()}
                                 </TableCell>
 
                                 {/* ADMIN ICONS */}
