@@ -1,6 +1,7 @@
 import { getSession } from "next-auth/react";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export class ApiError extends Error {
   constructor(
@@ -83,21 +84,33 @@ export const api = {
   get: <T = unknown>(endpoint: string, options?: FetchOptions) =>
     apiFetch<T>(endpoint, { ...options, method: "GET" }),
 
-  post: <T = unknown>(endpoint: string, data?: unknown, options?: FetchOptions) =>
+  post: <T = unknown>(
+    endpoint: string,
+    data?: unknown,
+    options?: FetchOptions
+  ) =>
     apiFetch<T>(endpoint, {
       ...options,
       method: "POST",
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  put: <T = unknown>(endpoint: string, data?: unknown, options?: FetchOptions) =>
+  put: <T = unknown>(
+    endpoint: string,
+    data?: unknown,
+    options?: FetchOptions
+  ) =>
     apiFetch<T>(endpoint, {
       ...options,
       method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  patch: <T = unknown>(endpoint: string, data?: unknown, options?: FetchOptions) =>
+  patch: <T = unknown>(
+    endpoint: string,
+    data?: unknown,
+    options?: FetchOptions
+  ) =>
     apiFetch<T>(endpoint, {
       ...options,
       method: "PATCH",

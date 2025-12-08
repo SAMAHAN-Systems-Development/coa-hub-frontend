@@ -6,6 +6,7 @@ export interface SectionContainerProps {
   card?: boolean;
   bgColor?: boolean;
   fullWidth?: boolean;
+  firstCardFullWidth?: boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ export const SectionContainer: React.FC<SectionContainerProps> = ({
   card = false,
   bgColor = false,
   fullWidth = false,
+  firstCardFullWidth = false,
 }) => {
   const cardStyle = card ? "dark:bg-muted rounded-xl" : "";
   const backgroundStyle = bgColor
@@ -37,8 +39,16 @@ export const SectionContainer: React.FC<SectionContainerProps> = ({
       <div className={`max-w-7xl mx-auto`}>
         {card ? (
           <div className="flex flex-wrap justify-center">
-            {React.Children.map(children, (child) => (
-              <div className="w-[300px] m-3">{child}</div>
+            {React.Children.map(children, (child, index) => (
+              <div
+                className={
+                  index === 0 && firstCardFullWidth
+                    ? "w-full m-2 md:m-3"
+                    : "w-[180px] md:w-[300px] m-2 md:m-3"
+                }
+              >
+                {child}
+              </div>
             ))}
           </div>
         ) : (
