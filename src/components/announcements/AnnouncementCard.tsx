@@ -12,12 +12,12 @@ interface Announcement {
   author: {
     name: string;
     avatar?: string;
+    role: string;
   };
   createdAt: string;
   title: string;
   body: string;
   image?: string;
-  category: "HEAD_COMMISSIONER" | "OTHER";
 }
 
 interface AnnouncementCardProps {
@@ -108,6 +108,9 @@ export default function AnnouncementCard({
             <h4 className="text-white font-semibold text-base sm:text-lg">
               {announcement.author.name}
             </h4>
+            <p className="text-gray-400 text-xs sm:text-sm">
+              {announcement.author.role}
+            </p>
             <p className="text-gray-300 text-sm sm:text-base">
               {formatDate(announcement.createdAt)}
             </p>

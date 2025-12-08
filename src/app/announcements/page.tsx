@@ -1,64 +1,174 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import AnnouncementCard from "@/components/announcements/AnnouncementCard";
-import { IoChevronDownSharp, IoChevronUpSharp } from "react-icons/io5";
+import CreateAnnouncementModal from "@/components/announcements/CreateAnnouncementModal";
+import EditAnnouncementModal from "@/components/announcements/EditAnnouncementModal";
+import DeleteAnnouncementDialog from "@/components/announcements/DeleteAnnouncementDialog";
+import { IoChevronDownSharp, IoChevronUpSharp, IoAdd } from "react-icons/io5";
+import { useAnnouncementsQuery } from "@/lib/api/queries/use-announcements";
+import { useDeleteAnnouncementMutation } from "@/lib/api/mutations/announcement.mutation";
+import { useAuth } from "@/lib/hooks/useAuth";
+import {
+  toAnnouncementDisplay,
+  groupAnnouncementsByRole,
+  AnnouncementDisplay,
+} from "@/lib/types/entities/announcement";
 
-//mock data for testing lang
-const mockAnnouncements = [
-  {
-    id: "1",
-    author: {
-      name: "John Doe",
-      avatar: undefined,
-    },
-    createdAt: "2025-08-05T22:00:00Z",
-    title: "ANNOUNCEMENT TITLE",
-    body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    image: undefined,
-    category: "HEAD_COMMISSIONER" as const,
-  },
-  {
-    id: "2",
-    author: {
-      name: "John Doe",
-      avatar: undefined,
-    },
-    createdAt: "2025-08-04T15:30:00Z",
-    title: "ANNOUNCEMENT TITLE",
-    body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    image: undefined,
-    category: "HEAD_COMMISSIONER" as const,
-  },
-  {
-    id: "3",
-    author: {
-      name: "Jane Smith",
-      avatar: undefined,
-    },
-    createdAt: "2025-08-03T10:00:00Z",
-    title: "IMPORTANT UPDATE",
-    body: "This is another announcement with important information for all students.",
-    image: undefined,
-    category: "OTHER" as const,
-  },
-];
+interface RoleSectionProps {
+  role: string;
+  announcements: AnnouncementDisplay[];
+  isExpanded: boolean;
+  onToggle: () => void;
+  isAdmin?: boolean;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+}
+
+function RoleSection({
+  role,
+  announcements,
+  isExpanded,
+  onToggle,
+  isAdmin,
+  onEdit,
+  onDelete,
+}: RoleSectionProps) {
+  return (
+    <section className="mb-6">
+      <div className="w-full flex items-center justify-between sm:border-b-2 sm:border-gray-900 sm:pb-4 lg:pb-5 border-b-0 bg-gradient-to-r from-[#6C7178] to-[#49515A] sm:bg-none rounded-lg sm:rounded-none p-4 sm:p-0">
+        <button
+          onClick={onToggle}
+          className="flex items-center gap-3 sm:gap-4 lg:gap-5 hover:opacity-80 transition-opacity"
+        >
+          <div className="flex items-center justify-center">
+            {isExpanded ? (
+              <IoChevronUpSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9 text-white sm:text-gray-900" />
+            ) : (
+              <IoChevronDownSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9 text-white sm:text-gray-900" />
+            )}
+          </div>
+          {/* Mobile layout */}
+          <div className="flex flex-col justify-center sm:hidden text-left">
+            <div
+              className="text-xl uppercase tracking-wider leading-none"
+              style={{
+                fontFamily: "Bebas Neue, sans-serif",
+                color: "#E7EAEF",
+              }}
+            >
+              From the
+            </div>
+            <h2
+              className="text-3xl font-normal uppercase tracking-wide leading-none mt-1"
+              style={{
+                fontFamily: "Bebas Neue, sans-serif",
+                color: "#E7EAEF",
+              }}
+            >
+              {role}
+            </h2>
+          </div>
+          {/* Desktop layout */}
+          <h2 className="hidden sm:block text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 uppercase tracking-wide">
+            From the {role}
+          </h2>
+        </button>
+      </div>
+
+      {/* expandable content */}
+      {isExpanded && (
+        <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+          {announcements.length > 0 ? (
+            announcements.map((announcement) => (
+              <AnnouncementCard
+                key={announcement.id}
+                announcement={announcement}
+                variant={isAdmin ? "admin" : "public"}
+                isExpanded={true}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))
+          ) : (
+            <div className="p-8 bg-gray-50 rounded-lg text-center border border-gray-200">
+              <p className="text-gray-500">
+                No announcements from the {role} yet.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
 
 export default function AnnoncementsPage() {
-  const [headCommissionerExpanded, setHeadCommissionerExpanded] =
-    useState(false);
-  const [otherAnnouncementsExpanded, setOtherAnnouncementsExpanded] =
-    useState(false);
+  const { data: announcements, isLoading, refetch } = useAnnouncementsQuery();
+  const { isAdmin } = useAuth();
+  const deleteMutation = useDeleteAnnouncementMutation();
 
-  //filter announcement by category
+  const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set());
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editModal, setEditModal] = useState<{
+    isOpen: boolean;
+    announcementId: number | null;
+  }>({ isOpen: false, announcementId: null });
+  const [deleteDialog, setDeleteDialog] = useState({
+    isOpen: false,
+    announcementId: "",
+  });
 
-  const headCommissionerAnnouncements = mockAnnouncements.filter(
-    (ann) => ann.category === "HEAD_COMMISSIONER"
-  );
-  const otherAnnouncements = mockAnnouncements.filter(
-    (ann) => ann.category === "OTHER"
-  );
+  // Transform and group announcements by role
+  const displayAnnouncements = useMemo(() => {
+    if (!announcements) return [];
+    return announcements.map(toAnnouncementDisplay);
+  }, [announcements]);
+
+  const groupedAnnouncements = useMemo(() => {
+    return groupAnnouncementsByRole(displayAnnouncements);
+  }, [displayAnnouncements]);
+
+  const roles = useMemo(() => {
+    return Array.from(groupedAnnouncements.keys());
+  }, [groupedAnnouncements]);
+
+  const toggleRole = (role: string) => {
+    setExpandedRoles((prev) => {
+      const next = new Set(prev);
+      if (next.has(role)) {
+        next.delete(role);
+      } else {
+        next.add(role);
+      }
+      return next;
+    });
+  };
+
+  const handleEdit = (id: string) => {
+    setEditModal({ isOpen: true, announcementId: parseInt(id, 10) });
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteDialog({ isOpen: true, announcementId: id });
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(parseInt(deleteDialog.announcementId, 10));
+      setDeleteDialog({ isOpen: false, announcementId: "" });
+      refetch();
+    } catch (error) {
+      console.error("Failed to delete announcement:", error);
+      alert("Failed to delete announcement. Please try again.");
+      setDeleteDialog({ isOpen: false, announcementId: "" });
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialog({ isOpen: false, announcementId: "" });
+  };
 
   return (
     <LayoutWrapper>
@@ -77,140 +187,42 @@ export default function AnnoncementsPage() {
       {/* main content */}
       <div className="min-h-screen bg-white py-8 sm:py-10 md:py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* From the Head Commissioner Section */}
-          <section className="mb-6">
-            {/*  the collapsible header */}
-            <div className="w-full flex items-center justify-between sm:border-b-2 sm:border-gray-900 sm:pb-4 lg:pb-5 border-b-0 bg-gradient-to-r from-[#6C7178] to-[#49515A] sm:bg-none rounded-lg sm:rounded-none p-4 sm:p-0">
+          {/* Admin add button */}
+          {isAdmin && (
+            <div className="flex justify-end mb-6">
               <button
-                onClick={() =>
-                  setHeadCommissionerExpanded(!headCommissionerExpanded)
-                }
-                className="flex items-center gap-3 sm:gap-4 lg:gap-5 hover:opacity-80 transition-opacity"
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
-                <div className="flex items-center justify-center">
-                  {headCommissionerExpanded ? (
-                    <IoChevronUpSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9 text-white sm:text-gray-900" />
-                  ) : (
-                    <IoChevronDownSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9 text-white sm:text-gray-900" />
-                  )}
-                </div>
-                {/* Mobile layout */}
-                <div className="flex flex-col justify-center sm:hidden text-left">
-                  <div
-                    className="text-xl uppercase tracking-wider leading-none"
-                    style={{
-                      fontFamily: "Bebas Neue, sans-serif",
-                      color: "#E7EAEF",
-                    }}
-                  >
-                    From the
-                  </div>
-                  <h2
-                    className="text-3xl font-normal uppercase tracking-wide leading-none mt-1"
-                    style={{
-                      fontFamily: "Bebas Neue, sans-serif",
-                      color: "#E7EAEF",
-                    }}
-                  >
-                    Head Commissioner
-                  </h2>
-                </div>
-                {/* Desktop layout */}
-                <h2 className="hidden sm:block text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 uppercase tracking-wide">
-                  From the Head Commissioner
-                </h2>
+                <IoAdd className="h-5 w-5" />
+                <span>Add Announcement</span>
               </button>
             </div>
+          )}
 
-            {/* expandable content */}
-            {headCommissionerExpanded && (
-              <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
-                {headCommissionerAnnouncements.length > 0 ? (
-                  headCommissionerAnnouncements.map((announcement) => (
-                    <AnnouncementCard
-                      key={announcement.id}
-                      announcement={announcement}
-                      variant="public"
-                      isExpanded={true}
-                    />
-                  ))
-                ) : (
-                  <div className="p-8 bg-gray-50 rounded-lg text-center border border-gray-200">
-                    <p className="text-gray-500">
-                      No announcements from the Head Commissioner yet.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </section>
-          {/* other announcements section */}
-          <section className="mb-6">
-            <div className="w-full flex items-center justify-between sm:border-b-2 sm:border-gray-900 sm:pb-4 lg:pb-5 border-b-0 bg-gradient-to-r from-[#6C7178] to-[#49515A] sm:bg-none rounded-lg sm:rounded-none p-4 sm:p-0">
-              <button
-                onClick={() =>
-                  setOtherAnnouncementsExpanded(!otherAnnouncementsExpanded)
-                }
-                className="flex items-center gap-3 sm:gap-4 lg:gap-5 hover:opacity-80 transition-opacity"
-              >
-                <div className="flex items-center justify-center">
-                  {otherAnnouncementsExpanded ? (
-                    <IoChevronUpSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9 text-white sm:text-gray-900" />
-                  ) : (
-                    <IoChevronDownSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9 text-white sm:text-gray-900" />
-                  )}
-                </div>
-                {/* Mobile layout */}
-                <div className="flex flex-col justify-center sm:hidden text-left">
-                  <h2
-                    className="text-xl font-normal uppercase tracking-wide leading-none"
-                    style={{
-                      fontFamily: "Bebas Neue, sans-serif",
-                      color: "#E7EAEF",
-                    }}
-                  >
-                    Other
-                  </h2>
-                  <h2
-                    className="text-3xl font-normal uppercase tracking-wide leading-none"
-                    style={{
-                      fontFamily: "Bebas Neue, sans-serif",
-                      color: "#E7EAEF",
-                    }}
-                  >
-                    Announcements
-                  </h2>
-                </div>
-                {/* Desktop layout */}
-                <h2 className="hidden sm:block text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 uppercase tracking-wide">
-                  Other Announcements
-                </h2>
-              </button>
+          {/* Dynamic role sections */}
+          {roles.map((role) => (
+            <RoleSection
+              key={role}
+              role={role}
+              announcements={groupedAnnouncements.get(role) || []}
+              isExpanded={expandedRoles.has(role)}
+              onToggle={() => toggleRole(role)}
+              isAdmin={isAdmin}
+              onEdit={handleEdit}
+              onDelete={handleDeleteClick}
+            />
+          ))}
+
+          {/* loading state */}
+          {isLoading && (
+            <div className="text-center py-16 sm:py-20">
+              <p className="text-gray-600">Loading announcements...</p>
             </div>
-
-            {/* expandable content */}
-            {otherAnnouncementsExpanded && (
-              <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
-                {otherAnnouncements.length > 0 ? (
-                  otherAnnouncements.map((announcement) => (
-                    <AnnouncementCard
-                      key={announcement.id}
-                      announcement={announcement}
-                      variant="public"
-                      isExpanded={true}
-                    />
-                  ))
-                ) : (
-                  <div className="p-8 bg-gray-50 rounded-lg text-center border border-gray-200">
-                    <p className="text-gray-500">No other announcements yet.</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </section>
+          )}
 
           {/* empty state - show only if no announcements */}
-          {mockAnnouncements.length === 0 && (
+          {!isLoading && displayAnnouncements.length === 0 && (
             <div className="text-center py-16 sm:py-20 bg-gray-50 rounded-lg border border-gray-200">
               <div className="max-w-md mx-auto px-4">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
@@ -224,6 +236,28 @@ export default function AnnoncementsPage() {
           )}
         </div>
       </div>
+
+      {/* Create Announcement Modal */}
+      <CreateAnnouncementModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={() => refetch()}
+      />
+
+      {/* Edit Announcement Modal */}
+      <EditAnnouncementModal
+        isOpen={editModal.isOpen}
+        announcementId={editModal.announcementId}
+        onClose={() => setEditModal({ isOpen: false, announcementId: null })}
+        onSuccess={() => refetch()}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteAnnouncementDialog
+        isOpen={deleteDialog.isOpen}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </LayoutWrapper>
   );
 }
