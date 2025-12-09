@@ -3,19 +3,18 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { BiPlus } from "react-icons/bi";
-import CancelFormDialog from "@/components/announcements/CancelFormDialog";
-import CreateFormDialog from "@/components/announcements/CreateFormDialog";
+import { Plus } from "lucide-react";
+import { SharedButton } from "@/components/shared/SharedButton";
+import ActionModal from "@/components/features/action_modal";
 import ImageUploadField from "@/components/announcements/ImageUploadField";
 import { useCreateAnnouncementMutation } from "@/lib/api/mutations/announcement.mutation";
 import {
@@ -34,7 +33,6 @@ export default function CreateAnnouncementModal({
   onClose,
   onSuccess,
 }: CreateAnnouncementModalProps) {
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const createMutation = useCreateAnnouncementMutation();
 
@@ -76,27 +74,14 @@ export default function CreateAnnouncementModal({
     }
   };
 
-  const handleCreateDialogClose = () => {
-    setShowCreateDialog(false);
-  };
-
-  const handleCancelClick = () => {
-    setShowCancelDialog(true);
-  };
-
-  const handleCancelConfirm = () => {
-    setShowCancelDialog(false);
+  const handleCancel = () => {
     reset();
     onClose();
   };
 
-  const handleCancelDialogClose = () => {
-    setShowCancelDialog(false);
-  };
-
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      handleCancelClick();
+      handleCancel();
     }
   };
 
@@ -104,137 +89,137 @@ export default function CreateAnnouncementModal({
     <>
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogContent
-          className="bg-gradient-to-br from-[#52575F] to-[#3D4249] border-none max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-6 sm:p-8"
-          showCloseButton={false}
+          className="w-full !max-w-[1200px] max-h-full overflow-y-auto rounded-xl p-10 text-white border border-white/10 [&>button]:hidden"
+          style={{
+            background: "linear-gradient(225deg, #6C7178 0%, #373C44 100%)",
+          }}
         >
+          {/* HEADER */}
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 sm:gap-4 justify-center sm:justify-start">
-              <BiPlus
-                className="h-8 w-8 sm:h-12 sm:w-12 text-[#E7EAEF]"
-                strokeWidth={0.1}
-              />
-              <span
-                className="text-2xl sm:text-4xl font-normal text-[#E7EAEF] uppercase tracking-wide"
-                style={{ fontFamily: "Bebas Neue, sans-serif" }}
-              >
-                New Announcement
-              </span>
-            </DialogTitle>
+            <div className="mt-3 flex items-center gap-3">
+              <Plus className="w-7 h-7 md:w-11 md:h-11" />
+              <DialogTitle className="text-4xl md:text-5xl font-bebas-neue font-medium tracking-wide">
+                NEW ANNOUNCEMENT
+              </DialogTitle>
+            </div>
           </DialogHeader>
 
-          {/* Form */}
+          {/* FORM */}
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-3 sm:space-y-6 mt-4"
+            className="mt-2 md:mt-8 space-y-6 pb-10 lg:pb-0"
           >
             {/* Subject Field */}
-            <div className="bg-gradient-to-r from-[#6C7178] to-[#373C44] rounded-2xl p-3 sm:p-6">
-              <div className="px-4 sm:px-0 space-y-2 sm:space-y-3">
-                <Label
-                  htmlFor="modal-subject"
-                  className="text-[#E7EAEF] text-base sm:text-lg font-medium"
-                >
-                  Subject
-                </Label>
-                <Input
-                  id="modal-subject"
-                  type="text"
-                  placeholder="Add Subject..."
-                  {...register("subject")}
-                  className="bg-[#e7eaef] border border-[#373C44] text-gray-800 placeholder:text-gray-400 h-[38px] sm:h-[46px] text-base focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none px-4"
-                  aria-invalid={!!errors.subject}
-                />
-                {errors.subject && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {errors.subject.message}
-                  </p>
-                )}
-              </div>
+            <div
+              className="rounded-2xl p-6 shadow-[0px_20px_60px_-20px_rgba(0,0,0,0.35)] flex flex-col gap-3"
+              style={{
+                background: "linear-gradient(90deg, rgba(120,125,133,0.65), rgba(55,60,68,0.90))",
+              }}
+            >
+              <label className="text-white text-base md:text-xl font-medium">
+                Subject
+              </label>
+              <Input
+                type="text"
+                placeholder="Add Subject..."
+                {...register("subject")}
+                className="bg-[#E6E9EE] text-gray-700 text-xs sm:text-sm md:text-xl placeholder:text-gray-500 rounded-xl h-12 border border-white/20 px-4"
+                aria-invalid={!!errors.subject}
+              />
+              {errors.subject && (
+                <p className="text-red-400 text-xs mt-1">
+                  {errors.subject.message}
+                </p>
+              )}
             </div>
 
             {/* Body Field */}
-            <div className="bg-gradient-to-r from-[#6C7178] to-[#373C44] rounded-2xl p-3 sm:p-6">
-              <div className="px-4 sm:px-0 space-y-2 sm:space-y-3">
-                <Label
-                  htmlFor="modal-body"
-                  className="text-[#E7EAEF] text-base sm:text-lg font-medium"
-                >
-                  Body
-                </Label>
-                <Textarea
-                  id="modal-body"
-                  placeholder="Add Text..."
-                  {...register("body")}
-                  rows={8}
-                  className="bg-[#e7eaef] border border-[#373C44] text-gray-800 placeholder:text-gray-400 resize-none text-base focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none px-4 min-h-[150px]"
-                  aria-invalid={!!errors.body}
-                />
-                {errors.body && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {errors.body.message}
-                  </p>
-                )}
-              </div>
+            <div
+              className="rounded-2xl p-6 shadow-[0px_20px_60px_-20px_rgba(0,0,0,0.35)] flex flex-col gap-3"
+              style={{
+                background: "linear-gradient(90deg, rgba(120,125,133,0.65), rgba(55,60,68,0.90))",
+              }}
+            >
+              <label className="text-white text-base md:text-xl font-medium">
+                Body
+              </label>
+              <Textarea
+                placeholder="Add Text..."
+                {...register("body")}
+                rows={8}
+                className="bg-[#E6E9EE] text-gray-700 text-xs sm:text-sm md:text-xl placeholder:text-gray-500 rounded-xl border border-white/20 px-4 min-h-[150px] resize-none"
+                aria-invalid={!!errors.body}
+              />
+              {errors.body && (
+                <p className="text-red-400 text-xs mt-1">
+                  {errors.body.message}
+                </p>
+              )}
             </div>
 
             {/* Images Field */}
-            <div className="bg-gradient-to-r from-[#6C7178] to-[#373C44] rounded-2xl p-3 sm:p-6">
-              <div className="px-4 sm:px-0 space-y-2 sm:space-y-3">
-                <Label className="text-[#E7EAEF] text-base sm:text-lg font-medium">
-                  Images
-                </Label>
-                <ImageUploadField
-                  value={images}
-                  onChange={(files) =>
-                    setValue("images", files, { shouldValidate: true })
-                  }
-                  maxFiles={5}
-                  maxSizeMB={5}
-                />
-                {errors.images && (
-                  <p className="text-red-400 text-xs mt-1">
-                    {errors.images.message}
-                  </p>
-                )}
-              </div>
+            <div
+              className="rounded-2xl p-6 shadow-[0px_20px_60px_-20px_rgba(0,0,0,0.35)] flex flex-col gap-3"
+              style={{
+                background: "linear-gradient(90deg, rgba(120,125,133,0.65), rgba(55,60,68,0.90))",
+              }}
+            >
+              <label className="text-white text-base md:text-xl font-medium">
+                Images
+              </label>
+              <ImageUploadField
+                value={images}
+                onChange={(files) =>
+                  setValue("images", files, { shouldValidate: true })
+                }
+                maxFiles={5}
+                maxSizeMB={5}
+              />
+              {errors.images && (
+                <p className="text-red-400 text-xs mt-1">
+                  {errors.images.message}
+                </p>
+              )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-row justify-end gap-4 sm:gap-4 pt-3 sm:pt-4">
-              <Button
+            {/* FOOTER BUTTONS */}
+            <DialogFooter className="mt-1 md:mt-8 flex flex-row justify-end gap-4">
+              <SharedButton
                 type="submit"
+                size="lg"
+                rounded="lg"
+                tone="glass"
                 disabled={createMutation.isPending}
-                className="w-24 sm:flex-none sm:w-auto bg-gradient-to-r from-[#6C7178] to-[#49515A] hover:from-[#373c44] hover:to-[#373c44] text-white px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-sm border-none h-auto font-normal transition-all disabled:opacity-50"
-                style={{ fontFamily: "Montserrat, sans-serif" }}
+                className="h-11 !px-6 !text-sm sm:!px-10 sm:!text-base md:min-w-[130px] md:!text-base"
               >
                 {createMutation.isPending ? "Saving..." : "Save"}
-              </Button>
-              <Button
+              </SharedButton>
+
+              <SharedButton
                 type="button"
-                onClick={handleCancelClick}
-                className="w-24 sm:flex-none sm:w-auto bg-white/5 backdrop-blur-md hover:bg-white/10 text-white px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-sm border border-white/40 h-auto font-normal shadow-sm"
-                style={{ fontFamily: "Montserrat, sans-serif" }}
+                onClick={handleCancel}
+                size="lg"
+                rounded="lg"
+                tone="glass"
+                className="h-11 !px-6 !text-sm sm:!px-10 sm:!text-base md:min-w-[130px] md:!text-base"
               >
                 Cancel
-              </Button>
-            </div>
+              </SharedButton>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Cancel Dialog */}
-      <CancelFormDialog
-        isOpen={showCancelDialog}
-        mode="create"
-        onConfirm={handleCancelConfirm}
-        onCancel={handleCancelDialogClose}
-      />
-
-      {/* Create Dialog */}
-      <CreateFormDialog
-        isOpen={showCreateDialog}
+      {/* Create Confirmation Dialog */}
+      <ActionModal
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        title="CREATE NEW ANNOUNCEMENT?"
+        description="Are you sure you want to create this announcement? It will be visible to all users."
+        confirmText="Create"
+        cancelText="Go Back"
         onConfirm={handleCreateConfirm}
-        onCancel={handleCreateDialogClose}
+        onCancel={() => setShowCreateDialog(false)}
       />
     </>
   );
