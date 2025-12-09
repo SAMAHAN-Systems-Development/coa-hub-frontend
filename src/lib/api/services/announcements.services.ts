@@ -17,6 +17,9 @@ export const announcementsService = {
 
   getById: (id: number) => api.get<Announcement>(`/announcements/${id}`),
 
+  getRecent: (days: number = 7) =>
+    api.get<Announcement[]>(`/announcements/recent?days=${days}`),
+
   create: (dto: CreateAnnouncementDto) =>
     api.post<Announcement>("/announcements", dto),
 

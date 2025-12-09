@@ -2,16 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { CopyPlus, Pencil, Trash2, Plus } from "lucide-react";
+import Image from "next/image";
+import { UserPlus, Pencil, Trash2, FolderPlus, Minus } from "lucide-react";
 
 import { SubmissionBinFolderSchema } from "@/lib/zod/submission-bin-folder";
 import type { SubmissionBinFolder as SubmissionBinFolderType } from "@/lib/types/entities/submission-bin-folder";
+import type { MemberDesignation } from "@/lib/types/entities/member-designation";
 
 import HeroContainer from "@/components/layout/HeroContainer";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentContainer from "@/components/layout/ContentContainer";
 
-import { SharedButton } from "@/components/shared/SharedButton";
 import { FullScreenLoader } from "@/components/shared/loading-spinner";
 import { EmptyState } from "@/components/shared/empty-state";
 import { toastError, toastSuccess } from "@/components/shared/toast";
@@ -22,11 +23,19 @@ import EditSubmissionBinFolderModal from "@/components/features/submission_bin_f
 
 import { useSubmissionBinFoldersQuery } from "@/lib/api/queries/use-submission-bin-folders";
 import { useSubmissionBinQuery } from "@/lib/api/queries/use-submission-bins";
+import { useMemberDesignationsQuery } from "@/lib/api/queries/use-member-designations";
+import { useGroupedMembersQuery } from "@/lib/api/queries/membersQueries";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SharedButton } from "@/components/shared/SharedButton";
 import {
   useCreateSubmissionBinFolderMutation,
   useUpdateSubmissionBinFolderMutation,
   useDeleteSubmissionBinFolderMutation,
 } from "@/lib/api/mutations/submission-bin-folders.mutation";
+import {
+  useCreateMemberDesignationMutation,
+  useDeleteMemberDesignationMutation,
+} from "@/lib/api/mutations/member-designations.mutation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
@@ -37,6 +46,9 @@ export default function SubmissionBinFolder() {
     useState<SubmissionBinFolderType | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [designateMemberModalOpen, setDesignateMemberModalOpen] = useState(false);
+  const [removeMemberModalOpen, setRemoveMemberModalOpen] = useState(false);
+  const [selectedDesignation, setSelectedDesignation] = useState<MemberDesignation | null>(null);
 
   const params = useParams();
   const binId = Number(params.id);
@@ -55,6 +67,11 @@ export default function SubmissionBinFolder() {
     isLoading,
     error,
   } = useSubmissionBinFoldersQuery();
+
+  // Member designations for this bin
+  const { data: designations } = useMemberDesignationsQuery(binId);
+  const { data: groupedMembers } = useGroupedMembersQuery();
+
   const createSubmissionBinFolder = useCreateSubmissionBinFolderMutation();
   const updateSubmissionBinFolder = useUpdateSubmissionBinFolderMutation(
     selectedSubmissionBinFolder?.id ?? 0
@@ -62,6 +79,8 @@ export default function SubmissionBinFolder() {
   const deleteSubmissionBinFolder = useDeleteSubmissionBinFolderMutation(
     selectedSubmissionBinFolder?.id ?? 0
   );
+  const createMemberDesignation = useCreateMemberDesignationMutation();
+  const deleteMemberDesignation = useDeleteMemberDesignationMutation();
 
   useEffect(() => {
     if (error) {
@@ -177,6 +196,43 @@ export default function SubmissionBinFolder() {
     }
   };
 
+  const handleAssignMember = async (memberId: number) => {
+    try {
+      await createMemberDesignation.mutateAsync({ memberId, binId });
+      toastSuccess({
+        title: "Member assigned",
+        description: "The member has been assigned to this bin.",
+      });
+    } catch (err) {
+      console.error("Failed to assign member:", err);
+    }
+  };
+
+  const handleRemoveMember = async () => {
+    if (!selectedDesignation) return;
+
+    try {
+      await deleteMemberDesignation.mutateAsync(selectedDesignation.id);
+      toastSuccess({
+        title: "Member removed",
+        description: "The member has been removed from this bin.",
+      });
+      setRemoveMemberModalOpen(false);
+      setSelectedDesignation(null);
+    } catch (err) {
+      console.error("Failed to remove member:", err);
+    }
+  };
+
+  // Get all members flattened from grouped data
+  const allMembers = groupedMembers?.flatMap((group) => group.members) || [];
+
+  // Get members not already assigned to this bin
+  const assignedMemberIds = designations?.map((d) => d.memberId) || [];
+  const availableMembers = allMembers.filter(
+    (m) => !assignedMemberIds.includes(m.id)
+  );
+
   // Filter folders by binId
   const filteredFolders =
     submission_bin_folder?.filter((folder) => folder.binId === binId) || [];
@@ -200,13 +256,23 @@ export default function SubmissionBinFolder() {
       <HeroContainer title="SUBMISSION BIN" subheading={bin.name} />
       <PageContainer>
         <ContentContainer>
-          {/* Designate Members */}
+          {/* Admin Actions Toolbar */}
           {isAdmin && (
-            <div className="bg-gradient-to-r from-[#6C7178] to-[#373C44] rounded-xl md:rounded-2xl p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] flex flex-row items-center gap-5 justify-between">
-              <label className="text-4xl md:text-6xl text-white font-medium font-bebas-neue uppercase">
-                Designate members to this bin
-              </label>
-              <CopyPlus className="text-white w-6 h-6 md:w-8 md:h-8" />
+            <div className="flex flex-wrap gap-3 justify-end">
+              <button
+                onClick={() => setDesignateMemberModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#49515A] to-[#373C44] text-white rounded-lg shadow hover:brightness-110 transition-all text-sm font-medium"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Designate Member</span>
+              </button>
+              <button
+                onClick={() => setShowDialog(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#49515A] to-[#373C44] text-white rounded-lg shadow hover:brightness-110 transition-all text-sm font-medium"
+              >
+                <FolderPlus className="w-4 h-4" />
+                <span>Add Folder</span>
+              </button>
             </div>
           )}
 
@@ -276,22 +342,6 @@ export default function SubmissionBinFolder() {
               <span className="italic">(e.g. {rawFileNameExample})</span>
             </p>
           </div>
-
-          {/* Add New Drive Link Folder */}
-          {isAdmin && (
-            <div className="w-full flex justify-end">
-              <SharedButton
-                onClick={() => setShowDialog(true)}
-                variant="primary"
-                tone="dark"
-                size="lg"
-                rounded="md"
-                className="px-6 py-4 md:px-8 md:py-6 text-xs sm:text-base md:text-lg font-light hover:!shadow-md hover:scale-[1.02] w-2/3 md:w-auto"
-              >
-                <Plus /> Add New Drive Link Folder
-              </SharedButton>
-            </div>
-          )}
 
           {/* Folder buttons with admin controls */}
           {filteredFolders.length > 0 ? (
@@ -413,6 +463,65 @@ export default function SubmissionBinFolder() {
               description="No submission folders have been added to this bin."
             />
           )}
+
+          {/* COA Auditors Section */}
+          {designations && designations.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-2xl md:text-3xl font-bebas-neue text-gray-800 mb-6">
+                COA AUDITORS
+              </h3>
+              <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+                {designations.map((designation) => (
+                  <div
+                    key={designation.id}
+                    className="group relative flex flex-col items-center p-2 md:p-3 w-[140px] md:w-[180px]"
+                  >
+                    {/* Remove button for admins */}
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          setSelectedDesignation(designation);
+                          setRemoveMemberModalOpen(true);
+                        }}
+                        className="absolute -top-1 -right-1 z-10 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove from bin"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                    )}
+                    <div className="relative w-full">
+                      {designation.member.imageUrl ? (
+                        <Image
+                          src={designation.member.imageUrl}
+                          alt={designation.member.name}
+                          width={180}
+                          height={230}
+                          className="w-full h-[180px] md:h-[230px] shadow-lg rounded-sm object-cover mb-2"
+                        />
+                      ) : (
+                        <div className="w-full h-[180px] md:h-[230px] rounded-sm bg-gray-100 border border-gray-300 mb-2 shadow-lg flex items-center justify-center">
+                          <span className="text-gray-400 text-4xl font-bold">
+                            {designation.member.name.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center space-y-0.5">
+                      <h4 className="font-bold text-sm md:text-base text-gray-800">
+                        {designation.member.name}
+                      </h4>
+                      <p className="text-xs md:text-sm text-gray-600">
+                        {designation.member.position}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {designation.member.email}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </ContentContainer>
       </PageContainer>
 
@@ -445,6 +554,102 @@ export default function SubmissionBinFolder() {
         confirmText="Delete"
         cancelText="Cancel"
         onConfirm={handleDelete}
+        destructive={true}
+      />
+
+      {/* Designate Member Modal */}
+      <Dialog
+        open={designateMemberModalOpen}
+        onOpenChange={setDesignateMemberModalOpen}
+      >
+        <DialogContent
+          className="w-full !max-w-[600px] max-h-[80vh] overflow-hidden rounded-xl p-6 md:p-10 text-white border border-white/10 [&>button]:hidden flex flex-col"
+          style={{
+            background: "linear-gradient(225deg, #6C7178 0%, #373C44 100%)",
+          }}
+        >
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <UserPlus className="w-7 h-7 md:w-9 md:h-9" />
+              <DialogTitle className="text-3xl md:text-4xl font-bebas-neue font-medium tracking-wide">
+                DESIGNATE MEMBER
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="mt-4 overflow-y-auto flex-1 pr-2">
+            {availableMembers.length > 0 ? (
+              <div className="space-y-3">
+                {availableMembers.map((member) => (
+                  <button
+                    key={member.id}
+                    onClick={() => {
+                      handleAssignMember(member.id);
+                      setDesignateMemberModalOpen(false);
+                    }}
+                    className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 transition-colors text-left border border-white/20 bg-white/5"
+                  >
+                    {member.imageUrl ? (
+                      <Image
+                        src={member.imageUrl}
+                        alt={member.name}
+                        width={48}
+                        height={48}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">
+                          {member.name.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-white truncate">
+                        {member.name}
+                      </p>
+                      <p className="text-sm text-gray-300 truncate">
+                        {member.position}
+                      </p>
+                    </div>
+                    <UserPlus className="w-5 h-5 text-white/60" />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-300">
+                <p>All members have been assigned to this bin.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <SharedButton
+              onClick={() => setDesignateMemberModalOpen(false)}
+              size="lg"
+              rounded="lg"
+              tone="glass"
+              className="h-11 !px-8"
+            >
+              Close
+            </SharedButton>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove Member Confirmation */}
+      <ActionModal
+        open={removeMemberModalOpen}
+        onOpenChange={setRemoveMemberModalOpen}
+        title="REMOVE MEMBER?"
+        description={
+          selectedDesignation
+            ? `Are you sure you want to remove "${selectedDesignation.member.name}" from this submission bin?`
+            : ""
+        }
+        confirmText="Remove"
+        cancelText="Cancel"
+        onConfirm={handleRemoveMember}
         destructive={true}
       />
     </ProtectedRoute>

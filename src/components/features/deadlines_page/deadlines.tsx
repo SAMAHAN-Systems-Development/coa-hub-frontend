@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ContentContainer } from "@/components/layout/ContentContainer";
-import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Spacer } from "@/components/layout/Spacer";
+import HeaderContainer from "@/components/layout/HeaderContainer";
 import { SharedButton } from "@/components/shared/SharedButton";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Pencil } from 'lucide-react';
@@ -43,17 +41,15 @@ export default function DeadlinesPage() {
 
     if (isLoading) {
         return (
-            <ContentContainer>
-                <SectionContainer>
-                    {/* Header skeleton */}
-                    <SkeletonCard size="lg" variant="text-only" className="mb-6" />
+            <section>
+                {/* Header skeleton */}
+                <SkeletonCard size="lg" variant="text-only" className="mb-6" />
 
-                    {/* Table skeleton */}
-                    <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] mt-8">
-                        <SkeletonCard size="md" lines={4} />
-                    </div>
-                </SectionContainer>
-            </ContentContainer>
+                {/* Table skeleton */}
+                <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] mt-8">
+                    <SkeletonCard size="md" lines={4} />
+                </div>
+            </section>
         );
     }
 
@@ -158,71 +154,58 @@ export default function DeadlinesPage() {
     };
 
     return (
-        <div>
-            <ContentContainer>
-                <SectionContainer>
-                    <div
-                        className="rounded-2xl p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] flex flex-col sm:flex-col md:flex-row items-center gap-4 md:gap-0 md:justify-between"
-                        style={{ background: "linear-gradient(90deg, #6C7178 0%, #373C44 100%)" }}
+        <section>
+            <HeaderContainer
+                title="DEADLINES"
+                actions={isAdmin ? (
+                    <SharedButton
+                        onClick={() => setShowDialog(true)}
+                        variant="primary"
+                        tone="glass"
+                        size="md"
+                        rounded="md"
+                        className="text-sm font-light hover:scale-[1.02]"
                     >
-                        <label className="text-6xl md:text-7xl text-white font-medium font-bebas-neue uppercase">Deadlines</label>
-                        {isAdmin && (
-                            <SharedButton
-                            onClick={() => setShowDialog(true)}
-                            variant="primary"
-                            tone="glass"
-                            size="lg"
-                            rounded="md"
-                            className="
-                                px-6 py-4 md:px-8 md:py-6 
-                                text-xs sm:text-base md:text-lg font-light 
-                                hover:!shadow-md
-                                hover:scale-[1.02] w-2/3 md:w-auto
-                            "
+                        Add New Deadline
+                    </SharedButton>
+                ) : undefined}
+            />
+
+            {/* TABLE */}
+            <div className="mt-6 px-8">
+                <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)]">
+                <Table className="border-collapse w-full">
+                    {/* HEADER */}
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead
+                                colSpan={isAdmin ? 3 : 2}
+                                className="text-center text-white text-sm sm:text-lg md:text-xl tracking-wide py-6 font-semibold"
+                                style={{
+                                    background: "linear-gradient(90deg, #6C7178 0%, #373C44 100%)",
+                                }}
                             >
-                            Add New Deadline
-                            </SharedButton>
-                        )}
-                    </div>
+                                MONTHLY LRS
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
 
-                    <Spacer size={7} />
-                
-                    {/* TABLE */}
-                    <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] mt-8">
-                        <Table className="border-collapse w-full">
-                            
-                            {/* HEADER */}
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead
-                                    colSpan={isAdmin ? 3 : 2}
-                                    className="text-center text-white text-sm sm:text-lg md:text-xl tracking-wide py-6 font-semibold"
-                                    style={{
-                                        background: "linear-gradient(90deg, #6C7178 0%, #373C44 100%)",
-                                    }}
-                                    >
-                                    MONTHLY LRS
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-
-                            {/* BODY */}
-                            <TableBody>
-                            {rows?.map((row, index) => (
-                                <TableRow key={index} className="border border-[#c8c8c8] hover:bg-transparent">
-                                
+                    {/* BODY */}
+                    <TableBody>
+                        {rows?.map((row, index) => (
+                            <TableRow key={index} className="border border-[#c8c8c8] hover:bg-transparent">
                                 {/* LABEL COLUMN */}
                                 <TableCell
                                     className="
-                                    text-white
-                                    text-xs sm:text-base md:text-xl
-                                    font-medium
-                                    py-8
-                                    text-center
-                                    border border-[#c8c8c8]
-                                    w-2/6 md:w-1/2
+                                        text-white
+                                        text-xs sm:text-base md:text-xl
+                                        font-medium
+                                        py-8
+                                        text-center
+                                        border border-[#c8c8c8]
+                                        w-2/6 md:w-1/2
                                     "
-                                    style={{ background:"linear-gradient(90deg, #373C44 0%, #6C7178 100%)"}}
+                                    style={{ background: "linear-gradient(90deg, #373C44 0%, #6C7178 100%)" }}
                                 >
                                     {row.name}
                                 </TableCell>
@@ -230,27 +213,24 @@ export default function DeadlinesPage() {
                                 {/* DUE DATE COLUMN */}
                                 <TableCell
                                     className="
-                                    text-center
-                                    text-[#373C44] 
-                                    text-xs sm:text-base md:text-xl
-                                    font-semibold
-                                    border border-[#c8c8c8]
-                                    py-8
-                                    w-2/6 md:w-1/4
+                                        text-center
+                                        text-[#373C44]
+                                        text-xs sm:text-base md:text-xl
+                                        font-semibold
+                                        border border-[#c8c8c8]
+                                        py-8
+                                        w-2/6 md:w-1/4
                                     "
-                                    style={{ background: "#F5F5F5"}}
+                                    style={{ background: "#F5F5F5" }}
                                 >
                                     {(() => {
                                         try {
                                             if (!row?.dueDate) return "";
                                             const d = new Date(row.dueDate);
-                                            // Build a local Date using the UTC year/month/date so
-                                            // the displayed day matches the original selected day
                                             const displayDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-                                            // Convert that UTC-based timestamp into a local Date with the same Y/M/D
                                             const localDisplay = new Date(displayDate.getUTCFullYear(), displayDate.getUTCMonth(), displayDate.getUTCDate());
                                             return format(localDisplay, "MMM d, yyyy");
-                                        } catch (e) {
+                                        } catch {
                                             return "";
                                         }
                                     })()}
@@ -260,62 +240,61 @@ export default function DeadlinesPage() {
                                 {isAdmin && (
                                     <TableCell
                                         className="
-                                            flex 
-                                            items-center 
-                                            gap-3 sm:gap-4 md:gap-6 
-                                            justify-center 
+                                            flex
+                                            items-center
+                                            gap-3 sm:gap-4 md:gap-6
+                                            justify-center
                                             py-8 px-1 sm:px-2 md:px-0
                                         "
                                         style={{ background: "#F5F5F5" }}
                                     >
-                                    <button 
-                                        onClick={() => {
-                                            setSelectedRow(row);
-                                            setEditModalOpen(true);
-                                        }}
-                                        className="text-[#373C44] hover:text-black transition"
-                                    >
-                                        <Pencil className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                                    </button>
-                                    <button 
-                                        onClick={() => {
-                                            setSelectedRow(row);
-                                            setDeleteModalOpen(true);
-                                        }}
-                                        className="text-[#373C44] hover:text-black transition"
-                                    >
-                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                                    </button>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedRow(row);
+                                                setEditModalOpen(true);
+                                            }}
+                                            className="text-[#373C44] hover:text-black transition"
+                                        >
+                                            <Pencil className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedRow(row);
+                                                setDeleteModalOpen(true);
+                                            }}
+                                            className="text-[#373C44] hover:text-black transition"
+                                        >
+                                            <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                                        </button>
                                     </TableCell>
                                 )}
-                                </TableRow>
-                            ))}
-                            </TableBody>
-                        </Table>
-                        <ActionModal
-                            open={deleteModalOpen}
-                            onOpenChange={setDeleteModalOpen}
-                            title="DELETE DEADLINE?"
-                            description="Are you sure you want to permanently delete this row? This cannot be undone."
-                            confirmText="Delete"
-                            cancelText="Cancel"
-                            onConfirm={handleDelete}
-                            onCancel={() => setDeleteModalOpen(false)}
-                        />
-                    </div>
-                    <CreateNewDeadlineModal
-                        open={showDialog}
-                        onClose={() => setShowDialog(false)}
-                        onSave={handleAddDeadline}
-                    />
-                    <EditDeadlineModal
-                        open={editModalOpen}
-                        onClose={() => setEditModalOpen(false)}
-                        deadline={selectedRow}
-                        onUpdate={handleUpdateDeadline}
-                    />
-                </SectionContainer>
-            </ContentContainer>
-        </div>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                <ActionModal
+                    open={deleteModalOpen}
+                    onOpenChange={setDeleteModalOpen}
+                    title="DELETE DEADLINE?"
+                    description="Are you sure you want to permanently delete this row? This cannot be undone."
+                    confirmText="Delete"
+                    cancelText="Cancel"
+                    onConfirm={handleDelete}
+                    onCancel={() => setDeleteModalOpen(false)}
+                />
+                </div>
+            </div>
+            <CreateNewDeadlineModal
+                open={showDialog}
+                onClose={() => setShowDialog(false)}
+                onSave={handleAddDeadline}
+            />
+            <EditDeadlineModal
+                open={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                deadline={selectedRow}
+                onUpdate={handleUpdateDeadline}
+            />
+        </section>
     );
 }

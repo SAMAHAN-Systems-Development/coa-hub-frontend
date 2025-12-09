@@ -1,54 +1,63 @@
-'use client';
+"use client";
 
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { useAuth } from '@/lib/hooks/useAuth';
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import HeroContainer from "@/components/layout/HeroContainer";
+import PageContainer from "@/components/layout/PageContainer";
+import ContentContainer from "@/components/layout/ContentContainer";
+import HeaderContainer from "@/components/layout/HeaderContainer";
+
+import { AnnouncementsCarousel, SubmissionBinsGrid } from "@/components/features/home";
+import DeadlinesPage from "@/components/features/deadlines_page/deadlines";
+import TemplatesPage from "@/components/features/templates_page/templates";
 
 export default function Home() {
-  return (
-    <ProtectedRoute>
-      <HomePage />
-    </ProtectedRoute>
-  );
-}
+    return (
+        <ProtectedRoute>
+            <HeroContainer title="COA: SUBMISSION HUB" />
+            <PageContainer>
+                <ContentContainer>
+                    {/* Announcements Section */}
+                    <section>
+                        <HeaderContainer title="ANNOUNCEMENTS" />
+                        <div className="mt-6 px-8">
+                            <AnnouncementsCarousel />
+                        </div>
+                    </section>
 
-function HomePage() {
-  const { user, isAdmin } = useAuth();
+                    {/* Description Section */}
+                    <section className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 shadow-md">
+                        <div className="max-w-4xl mx-auto text-center space-y-4">
+                            <h2 className="text-3xl md:text-4xl font-bebas-neue text-gray-900">
+                                Welcome to the Commission on Audit&apos;s Submission Hub!
+                            </h2>
+                            <p className="text-gray-700 font-montserrat leading-relaxed text-base md:text-lg">
+                                This platform is an initiative of the Commission aimed at streamlining
+                                the submission process of required reports that undergo thorough auditing
+                                by CoA&apos;s esteemed auditors.
+                            </p>
+                            <p className="text-gray-600 font-montserrat text-sm md:text-base">
+                                You may access your designated Google Drive folders by clicking the
+                                submission bin above or on the side of your screen, or by using the
+                                buttons below.
+                            </p>
+                        </div>
+                    </section>
 
-  return (
-    <div className="container mx-auto px-6 py-16">
+                    {/* Submission Bins Section */}
+                    <section>
+                        <HeaderContainer title="SUBMISSION BINS" />
+                        <div className="mt-6 px-8">
+                            <SubmissionBinsGrid />
+                        </div>
+                    </section>
 
-        {/* User Info Card */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-8 shadow-md">
-            <h2 className="text-2xl font-semibold mb-4 font-bebas tracking-wide">
-              Your Account
-            </h2>
-            <div className="space-y-3 font-montserrat">
-              <div className="flex items-center gap-3">
-                <span className="font-medium text-gray-600">Name:</span>
-                <span className="text-gray-900">{user?.name}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-medium text-gray-600">Email:</span>
-                <span className="text-gray-900">{user?.email}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-medium text-gray-600">Account Type:</span>
-                {isAdmin ? (
-                  <span className="px-3 py-1 bg-gradient-to-br from-[#373C44] to-[#49515A] text-white text-sm rounded font-bold">
-                    ADMIN
-                  </span>
-                ) : (
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded font-semibold">
-                    USER
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+                    {/* Deadlines Section */}
+                    <DeadlinesPage />
+                </ContentContainer>
+            </PageContainer>
 
-
-      </div>
-  );
+            {/* Templates Section */}
+            <TemplatesPage />
+        </ProtectedRoute>
+    );
 }

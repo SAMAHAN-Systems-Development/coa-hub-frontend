@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { ContentContainer } from "@/components/layout/ContentContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Spacer } from "@/components/layout/Spacer";
+import HeaderContainer from "@/components/layout/HeaderContainer";
 import { SharedButton } from "@/components/shared/SharedButton";
 import ActionModal from "@/components/features/action_modal";
 import CreateNewTemplateModal from "@/components/features/templates_page/create_new_template";
@@ -189,42 +189,37 @@ export default function TemplatesPage() {
     >
         <ContentContainer>
         <SectionContainer>
-            <div className="flex flex-col md:flex-row md:justify-between items-center">
-            <h1 className="text-6xl md:text-7xl text-white font-medium font-bebas-neue uppercase">
-                Templates
-            </h1>
-            {isAdmin && (
-              <SharedButton
-                onClick={() => setShowDialog(true)}
-                variant="primary"
-                tone="glass"
-                size="lg"
-                rounded="md"
-                className="
-                  px-6 py-4 md:px-8 md:py-6 
-                  text-xs sm:text-base md:text-lg font-light
-                  hover:!shadow-md
-                  hover:scale-[1.02] w-2/3 md:w-auto
-                "
-              >
-                Add New Template
-              </SharedButton>
-            )}
-            </div>
-            <Spacer size={20} />
+            <HeaderContainer
+                title="TEMPLATES"
+                whiteText
+                noBg
+                actions={isAdmin ? (
+                    <SharedButton
+                        onClick={() => setShowDialog(true)}
+                        variant="primary"
+                        tone="glass"
+                        size="md"
+                        rounded="md"
+                        className="text-sm font-light hover:scale-[1.02]"
+                    >
+                        Add New Template
+                    </SharedButton>
+                ) : undefined}
+            />
 
             {/* TEMPLATE GRID */}
-            <div
-              className="
-                grid grid-cols-1 
-                gap-y-10 px-4 sm:px-10 place-items-center
+            <div className="mt-6">
+              <div
+                className="
+                  grid grid-cols-1
+                  gap-y-10 px-4 sm:px-10 place-items-center
 
-                md:grid-cols-2 
-                md:gap-y-12 md:gap-x-8 
-                md:px-20 
-                lg:px-40
-              "
-            >
+                  md:grid-cols-2
+                  md:gap-y-12 md:gap-x-8
+                  md:px-20
+                  lg:px-40
+                "
+              >
                 {templates?.map((template, index) => {
                     const previewUrl = getDrivePreviewUrl(template.gdriveLink);
                     // Check if last item and odd number of templates
@@ -310,6 +305,7 @@ export default function TemplatesPage() {
                     </div>
                     );
                 })}
+              </div>
             </div>
         </SectionContainer>
         </ContentContainer>

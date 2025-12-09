@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { IoChevronDownSharp, IoChevronUpSharp, IoAdd } from "react-icons/io5";
+import { IoChevronDownSharp, IoChevronUpSharp } from "react-icons/io5";
+import { SharedButton } from "@/components/shared/SharedButton";
 
 import HeroContainer from "@/components/layout/HeroContainer";
 import PageContainer from "@/components/layout/PageContainer";
@@ -54,20 +55,21 @@ function RoleSection({
             onClick={onToggle}
             className="flex items-center gap-3 sm:gap-4 lg:gap-5 hover:opacity-80 transition-opacity"
           >
-            <div className="flex items-center justify-center">
-              {isExpanded ? (
-                <IoChevronUpSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9" />
-              ) : (
-                <IoChevronDownSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9" />
-              )}
+            <div className={`flex items-center justify-center transition-transform duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
+              <IoChevronDownSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9" />
             </div>
             <span>From the {role}</span>
           </button>
         }
       />
 
-      {isExpanded && (
-        <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+      <div
+        className={`
+          overflow-hidden transition-all duration-300 ease-in-out
+          ${isExpanded ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'}
+        `}
+      >
+        <div className="mt-6 px-8 space-y-4 sm:space-y-6">
           {announcements.length > 0 ? (
             announcements.map((announcement) => (
               <AnnouncementCard
@@ -87,7 +89,7 @@ function RoleSection({
             />
           )}
         </div>
-      )}
+      </div>
     </SectionContainer>
   );
 }
@@ -185,20 +187,25 @@ export default function AnnouncementsPage() {
       <HeroContainer title="ANNOUNCEMENTS" />
       <PageContainer>
         <ContentContainer>
-          {/* Admin add button */}
-          {isAdmin && (
-            <div className="flex justify-end mb-6">
-              <button
+          {/* Main Header with Add Button */}
+          <HeaderContainer
+            title="ALL ANNOUNCEMENTS"
+            actions={isAdmin ? (
+              <SharedButton
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                variant="primary"
+                tone="glass"
+                size="md"
+                rounded="md"
+                className="text-sm font-light hover:scale-[1.02]"
               >
-                <IoAdd className="h-5 w-5" />
-                <span>Add Announcement</span>
-              </button>
-            </div>
-          )}
+                Add Announcement
+              </SharedButton>
+            ) : undefined}
+          />
 
           {/* Dynamic role sections */}
+          <div className="mt-6 px-8">
           {roles.length > 0 ? (
             roles.map((role) => (
               <RoleSection
@@ -218,6 +225,7 @@ export default function AnnouncementsPage() {
               description="Check back later for updates and announcements."
             />
           )}
+          </div>
         </ContentContainer>
       </PageContainer>
 

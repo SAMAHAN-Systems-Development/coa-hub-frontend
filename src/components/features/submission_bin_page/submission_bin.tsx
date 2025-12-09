@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { ContentContainer } from "@/components/layout/ContentContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Spacer } from "@/components/layout/Spacer";
+import HeaderContainer from "@/components/layout/HeaderContainer";
 import { SharedButton } from "@/components/shared/SharedButton";
 import { Pencil } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
@@ -127,57 +127,26 @@ export default function SubmissionBinPage() {
         <div>
             <ContentContainer>
                 <SectionContainer>
-                    <div
-                        className="rounded-2xl p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)] flex flex-col gap-4"
-                        style={{ background: "linear-gradient(90deg, #6C7178 0%, #373C44 100%)" }}
-                    >
-                        {/* Header */}
-                        <div
-                        className="
-                            flex flex-col sm:flex-col md:flex-row
-                            items-center
-                            gap-4 md:gap-0
-                            md:justify-between
-                        "
-                        >
-                        <label
-                            className={`
-                            text-6xl md:text-7xl text-white font-medium font-bebas-neue uppercase
-                            ${!isAdmin ? "mx-auto" : ""}  // Center text only if NOT admin
-                            `}
-                        >
-                            Folders
-                        </label>
-
-                        {/* Only show button for admins */}
-                        {isAdmin && (
+                    <HeaderContainer
+                        title="FOLDERS"
+                        subtitle="You may access your designated Google Drive folders by clicking the submission bin above or on the side of your screen, or by using the buttons below."
+                        actions={isAdmin ? (
                             <SharedButton
-                            onClick={() => setShowDialog(true)}
-                            variant="primary"
-                            tone="glass"
-                            size="lg"
-                            rounded="md"
-                            className="
-                                px-6 py-4 md:px-8 md:py-6 
-                                text-xs sm:text-base md:text-lg font-light 
-                                hover:!shadow-md
-                                hover:scale-[1.02] w-2/3 md:w-auto
-                            "
+                                onClick={() => setShowDialog(true)}
+                                variant="primary"
+                                tone="glass"
+                                size="md"
+                                rounded="md"
+                                className="text-sm font-light hover:scale-[1.02]"
                             >
-                            Add New Folder
+                                Add New Folder
                             </SharedButton>
-                        )}
-                        </div>
-                        <div className="text-white font-montserrat text-center text-xs md:text-base lg:-text-lg">
-                            You may access your designated Google Drive folders by clicking the submission bin above
-                            or on the side of your screen, or by using the buttons below.
-                        </div>
-                    </div>
+                        ) : undefined}
+                    />
 
-                    <Spacer size={7} />
-                
                     {/* Folders */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full font-montserrat font-semibold">
+                    <div className="mt-6 px-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full font-montserrat font-semibold">
                     {submission_bin?.map((bin) => (
                         <Link
                             key={bin.id}
@@ -279,6 +248,7 @@ export default function SubmissionBinPage() {
                         )}
                         </Link>
                     ))}
+                        </div>
                     </div>
 
                 </SectionContainer>

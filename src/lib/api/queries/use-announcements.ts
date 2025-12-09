@@ -10,6 +10,14 @@ export function useAnnouncementsQuery(params?: AnnouncementQueryParams) {
   });
 }
 
+export function useRecentAnnouncementsQuery(days: number = 7) {
+  return useQuery({
+    queryKey: ["announcements", "recent", days],
+    queryFn: () => announcementsService.getRecent(days),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
 export function useAnnouncementQuery(
   id: number,
   options?: { enabled?: boolean }
