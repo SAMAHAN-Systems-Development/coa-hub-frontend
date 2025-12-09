@@ -1,7 +1,6 @@
 'use client';
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function Home() {
@@ -16,8 +15,7 @@ function HomePage() {
   const { user, isAdmin } = useAuth();
 
   return (
-    <LayoutWrapper>
-      <div className="container mx-auto px-6 py-16">
+    <div className="container mx-auto px-6 py-16">
 
         {/* User Info Card */}
         <div className="max-w-4xl mx-auto mb-8">
@@ -52,6 +50,5 @@ function HomePage() {
 
 
       </div>
-    </LayoutWrapper>
   );
 }

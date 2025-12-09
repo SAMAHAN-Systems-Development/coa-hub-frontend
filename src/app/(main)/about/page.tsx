@@ -10,7 +10,6 @@ import Spacer from "@/components/layout/Spacer";
 import { useGroupedMembersQuery } from "@/lib/api/queries/membersQueries";
 import { FullScreenLoader } from "@/components/shared/loading-spinner";
 import { EmptyState } from "@/components/shared/empty-state";
-import Image from "next/image";
 
 export default function AboutUs() {
   const { data: groupedMembers, isLoading, error } = useGroupedMembersQuery();

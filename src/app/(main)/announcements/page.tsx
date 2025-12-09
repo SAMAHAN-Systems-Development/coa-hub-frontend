@@ -1,12 +1,22 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import LayoutWrapper from "@/components/layout/LayoutWrapper";
+import { IoChevronDownSharp, IoChevronUpSharp, IoAdd } from "react-icons/io5";
+
+import HeroContainer from "@/components/layout/HeroContainer";
+import PageContainer from "@/components/layout/PageContainer";
+import ContentContainer from "@/components/layout/ContentContainer";
+import SectionContainer from "@/components/layout/SectionContainer";
+import HeaderContainer from "@/components/layout/HeaderContainer";
+
 import AnnouncementCard from "@/components/announcements/AnnouncementCard";
 import CreateAnnouncementModal from "@/components/announcements/CreateAnnouncementModal";
 import EditAnnouncementModal from "@/components/announcements/EditAnnouncementModal";
 import DeleteAnnouncementDialog from "@/components/announcements/DeleteAnnouncementDialog";
-import { IoChevronDownSharp, IoChevronUpSharp, IoAdd } from "react-icons/io5";
+
+import { FullScreenLoader } from "@/components/shared/loading-spinner";
+import { EmptyState } from "@/components/shared/empty-state";
+
 import { useAnnouncementsQuery } from "@/lib/api/queries/use-announcements";
 import { useDeleteAnnouncementMutation } from "@/lib/api/mutations/announcement.mutation";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -15,6 +25,7 @@ import {
   groupAnnouncementsByRole,
   AnnouncementDisplay,
 } from "@/lib/types/entities/announcement";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 interface RoleSectionProps {
   role: string;
@@ -36,48 +47,25 @@ function RoleSection({
   onDelete,
 }: RoleSectionProps) {
   return (
-    <section className="mb-6">
-      <div className="w-full flex items-center justify-between sm:border-b-2 sm:border-gray-900 sm:pb-4 lg:pb-5 border-b-0 bg-gradient-to-r from-[#6C7178] to-[#49515A] sm:bg-none rounded-lg sm:rounded-none p-4 sm:p-0">
-        <button
-          onClick={onToggle}
-          className="flex items-center gap-3 sm:gap-4 lg:gap-5 hover:opacity-80 transition-opacity"
-        >
-          <div className="flex items-center justify-center">
-            {isExpanded ? (
-              <IoChevronUpSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9 text-white sm:text-gray-900" />
-            ) : (
-              <IoChevronDownSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9 text-white sm:text-gray-900" />
-            )}
-          </div>
-          {/* Mobile layout */}
-          <div className="flex flex-col justify-center sm:hidden text-left">
-            <div
-              className="text-xl uppercase tracking-wider leading-none"
-              style={{
-                fontFamily: "Bebas Neue, sans-serif",
-                color: "#E7EAEF",
-              }}
-            >
-              From the
+    <SectionContainer className="mb-6">
+      <HeaderContainer
+        title={
+          <button
+            onClick={onToggle}
+            className="flex items-center gap-3 sm:gap-4 lg:gap-5 hover:opacity-80 transition-opacity"
+          >
+            <div className="flex items-center justify-center">
+              {isExpanded ? (
+                <IoChevronUpSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9" />
+              ) : (
+                <IoChevronDownSharp className="h-5 w-5 sm:h-8 sm:w-8 lg:w-9 lg:h-9" />
+              )}
             </div>
-            <h2
-              className="text-3xl font-normal uppercase tracking-wide leading-none mt-1"
-              style={{
-                fontFamily: "Bebas Neue, sans-serif",
-                color: "#E7EAEF",
-              }}
-            >
-              {role}
-            </h2>
-          </div>
-          {/* Desktop layout */}
-          <h2 className="hidden sm:block text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 uppercase tracking-wide">
-            From the {role}
-          </h2>
-        </button>
-      </div>
+            <span>From the {role}</span>
+          </button>
+        }
+      />
 
-      {/* expandable content */}
       {isExpanded && (
         <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
           {announcements.length > 0 ? (
@@ -92,20 +80,20 @@ function RoleSection({
               />
             ))
           ) : (
-            <div className="p-8 bg-gray-50 rounded-lg text-center border border-gray-200">
-              <p className="text-gray-500">
-                No announcements from the {role} yet.
-              </p>
-            </div>
+            <EmptyState
+              title={`No announcements from the ${role} yet`}
+              description="Check back later for updates."
+              size="sm"
+            />
           )}
         </div>
       )}
-    </section>
+    </SectionContainer>
   );
 }
 
-export default function AnnoncementsPage() {
-  const { data: announcements, isLoading, refetch } = useAnnouncementsQuery();
+export default function AnnouncementsPage() {
+  const { data: announcements, isLoading, error, refetch } = useAnnouncementsQuery();
   const { isAdmin } = useAuth();
   const deleteMutation = useDeleteAnnouncementMutation();
 
@@ -156,7 +144,9 @@ export default function AnnoncementsPage() {
 
   const handleConfirmDelete = async () => {
     try {
-      await deleteMutation.mutateAsync(parseInt(deleteDialog.announcementId, 10));
+      await deleteMutation.mutateAsync(
+        parseInt(deleteDialog.announcementId, 10)
+      );
       setDeleteDialog({ isOpen: false, announcementId: "" });
       refetch();
     } catch (error) {
@@ -170,23 +160,31 @@ export default function AnnoncementsPage() {
     setDeleteDialog({ isOpen: false, announcementId: "" });
   };
 
-  return (
-    <LayoutWrapper>
-      {/* hero - full screen */}
-      <section className="relative h-[50vh] sm:h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#6C7178] to-[#373C44] rounded-b-3xl sm:rounded-none">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1
-            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-lg text-[#E7EAEF] uppercase tracking-wide"
-            style={{ fontFamily: "Bebas Neue, sans-serif" }}
-          >
-            Announcements
-          </h1>
-        </div>
-      </section>
+  if (isLoading) {
+    return <FullScreenLoader label="Loading announcements..." />;
+  }
 
-      {/* main content */}
-      <div className="min-h-screen bg-white py-8 sm:py-10 md:py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  if (error) {
+    return (
+      <ProtectedRoute>
+        <HeroContainer title="ANNOUNCEMENTS" />
+        <PageContainer>
+          <ContentContainer>
+            <EmptyState
+              title="Error loading announcements"
+              description="Failed to load announcements. Please try again."
+            />
+          </ContentContainer>
+        </PageContainer>
+      </ProtectedRoute>
+    );
+  }
+
+  return (
+    <ProtectedRoute>
+      <HeroContainer title="ANNOUNCEMENTS" />
+      <PageContainer>
+        <ContentContainer>
           {/* Admin add button */}
           {isAdmin && (
             <div className="flex justify-end mb-6">
@@ -201,41 +199,27 @@ export default function AnnoncementsPage() {
           )}
 
           {/* Dynamic role sections */}
-          {roles.map((role) => (
-            <RoleSection
-              key={role}
-              role={role}
-              announcements={groupedAnnouncements.get(role) || []}
-              isExpanded={expandedRoles.has(role)}
-              onToggle={() => toggleRole(role)}
-              isAdmin={isAdmin}
-              onEdit={handleEdit}
-              onDelete={handleDeleteClick}
+          {roles.length > 0 ? (
+            roles.map((role) => (
+              <RoleSection
+                key={role}
+                role={role}
+                announcements={groupedAnnouncements.get(role) || []}
+                isExpanded={expandedRoles.has(role)}
+                onToggle={() => toggleRole(role)}
+                isAdmin={isAdmin}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+              />
+            ))
+          ) : (
+            <EmptyState
+              title="No Announcements Yet"
+              description="Check back later for updates and announcements."
             />
-          ))}
-
-          {/* loading state */}
-          {isLoading && (
-            <div className="text-center py-16 sm:py-20">
-              <p className="text-gray-600">Loading announcements...</p>
-            </div>
           )}
-
-          {/* empty state - show only if no announcements */}
-          {!isLoading && displayAnnouncements.length === 0 && (
-            <div className="text-center py-16 sm:py-20 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="max-w-md mx-auto px-4">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
-                  No Announcements Yet
-                </h3>
-                <p className="text-base sm:text-lg text-gray-600">
-                  Check back later for updates and announcements.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+        </ContentContainer>
+      </PageContainer>
 
       {/* Create Announcement Modal */}
       <CreateAnnouncementModal
@@ -258,6 +242,6 @@ export default function AnnoncementsPage() {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
-    </LayoutWrapper>
+    </ProtectedRoute>
   );
 }

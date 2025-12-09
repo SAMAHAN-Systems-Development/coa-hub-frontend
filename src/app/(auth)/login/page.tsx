@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ArrowLeft } from "lucide-react";
 
 const GoogleIcon = () => (
   <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
@@ -35,19 +36,7 @@ const BackButton = ({ onClick }: { onClick: () => void }) => (
     onClick={onClick}
     className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4 group"
   >
-    <svg
-      className="w-5 h-5 transition-transform group-hover:-translate-x-1"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M10 19l-7-7m0 0l7-7m-7 7h18"
-      />
-    </svg>
+    <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
     <span className="font-medium">Back</span>
   </button>
 );
