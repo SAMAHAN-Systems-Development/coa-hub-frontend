@@ -5,11 +5,13 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { FaUserCircle } from "react-icons/fa";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useSubmissionBinsQuery } from "@/lib/api/queries/use-submission-bins";
 
 const navFont = { fontFamily: "'Bebas Neue', sans-serif" };
 
 const Navbar = () => {
   const { isAuthenticated, isAdmin, user } = useAuth();
+  const { data: submissionBins, isLoading: binsLoading } = useSubmissionBinsQuery();
   const [aboutOpen, setAboutOpen] = useState(false);
   const [binsOpen, setBinsOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -146,18 +148,10 @@ const Navbar = () => {
                   </li>
                   <li>
                     <Link
-                      href="#"
+                      href="/members"
                       className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
                     >
                       Members
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                    >
-                      Log In (Admin)
                     </Link>
                   </li>
                 </ul>
@@ -200,54 +194,22 @@ const Navbar = () => {
                   aria-labelledby="bins-button"
                   className="absolute left-1/2 -translate-x-1/2 mt-2 min-w-[260px] bg-[#e7eaef] rounded-lg shadow-lg py-2 z-10 font-montserrat"
                 >
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                    >
-                      Clusters
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                    >
-                      Offices
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                    >
-                      Departments
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                    >
-                      Autonomous Commissions
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                    >
-                      Independent Bodies
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                    >
-                      Events
-                    </Link>
-                  </li>
+                  {binsLoading ? (
+                    <li className="px-4 py-2 text-gray-500 text-sm">Loading...</li>
+                  ) : submissionBins && submissionBins.length > 0 ? (
+                    submissionBins.map((bin) => (
+                      <li key={bin.id}>
+                        <Link
+                          href={`/submission-bin/${bin.id}`}
+                          className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
+                        >
+                          {bin.name}
+                        </Link>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-500 text-sm">No bins exist yet</li>
+                  )}
                 </ul>
               )}
             </li>
@@ -294,6 +256,16 @@ const Navbar = () => {
                   aria-labelledby="profile-button"
                   className="absolute right-0 mt-2 min-w-[160px] bg-[#e7eaef] rounded-lg shadow-lg py-2 z-10 font-montserrat"
                 >
+                  {isAdmin && (
+                    <li>
+                      <Link
+                        href="/admin"
+                        className="block w-full text-left px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
+                      >
+                        Admin Dashboard
+                      </Link>
+                    </li>
+                  )}
                   <li>
                     <button
                       className="block w-full text-left px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
@@ -412,20 +384,11 @@ const Navbar = () => {
                   </li>
                   <li>
                     <Link
-                      href="#"
+                      href="/members"
                       className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
                       onClick={() => setMobileOpen(false)}
                     >
                       Members
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Log In (Admin)
                     </Link>
                   </li>
                 </ul>
@@ -457,60 +420,23 @@ const Navbar = () => {
                   role="menu"
                   className="ml-4 mt-1 bg-[#e7eaef] rounded-lg shadow-lg py-2 font-montserrat"
                 >
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Clusters
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Offices
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Departments
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Autonomous Commissions
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Independent Bodies
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="#"
-                      className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      Events
-                    </Link>
-                  </li>
+                  {binsLoading ? (
+                    <li className="px-4 py-2 text-gray-500 text-sm">Loading...</li>
+                  ) : submissionBins && submissionBins.length > 0 ? (
+                    submissionBins.map((bin) => (
+                      <li key={bin.id}>
+                        <Link
+                          href={`/submission-bin/${bin.id}`}
+                          className="block px-4 py-2 hover:bg-[#9a9fa7] hover:text-white font-montserrat"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          {bin.name}
+                        </Link>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-500 text-sm">No bins exist yet</li>
+                  )}
                 </ul>
               )}
             </li>
