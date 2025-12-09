@@ -225,35 +225,54 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 });
 
 /**
+ * Refresh token mutex to prevent concurrent refresh attempts
+ */
+let refreshPromise: Promise<any> | null = null;
+
+/**
  * Refresh the access token using the refresh token
  */
 async function refreshAccessToken(token: any) {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token.refreshToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to refresh token");
-    }
-
-    const data = await response.json();
-
-    return {
-      ...token,
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken || token.refreshToken,
-      accessTokenExpires: Date.now() + (data.expiresIn || 3600) * 1000,
-    };
-  } catch (error) {
-    console.error("Token refresh error:", error);
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    };
+  // If a refresh is already in progress, wait for it
+  if (refreshPromise) {
+    return refreshPromise;
   }
+
+  refreshPromise = (async () => {
+    try {
+      console.log("Attempting refresh with token:", token.refreshToken ? "present" : "MISSING");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.refreshToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error("Refresh failed:", response.status, errorBody);
+        throw new Error(`Failed to refresh token: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      return {
+        ...token,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken || token.refreshToken,
+        accessTokenExpires: Date.now() + (data.expiresIn || 3600) * 1000,
+      };
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      return {
+        ...token,
+        error: "RefreshAccessTokenError",
+      };
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
