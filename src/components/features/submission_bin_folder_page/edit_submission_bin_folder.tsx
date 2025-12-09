@@ -13,12 +13,12 @@ interface EditSubmissionBinFolderModalProps {
     open: boolean;
     onClose: () => void;
     submissionBinFolder: {
-        id: string;
+        id: number;
         binId: number;
         folderName: string;
         gdriveLink: string;
     } | null;
-    onUpdate: (updated: { id: string; binId: number; folderName: string; gdriveLink: string }) => void;
+    onUpdate: (updated: { binId: number; folderName: string; gdriveLink: string }) => void;
 }
 
 export default function EditSubmissionBinFolderModal({
@@ -51,13 +51,12 @@ export default function EditSubmissionBinFolderModal({
     function confirmUpdate() {
         if (!submissionBinFolder) return;
         const payload = {
-            id: submissionBinFolder.id,
             binId: submissionBinFolder.binId,
             folderName: folderName.trim(),
             gdriveLink: gdriveLink.trim(),
         };
 
-        const parsed = SubmissionBinFolderSchema.safeParse(payload);
+        const parsed = SubmissionBinFolderSchema.omit({ id: true }).safeParse(payload);
         if (!parsed.success) {
             toastError({
                 title: "Invalid input",
