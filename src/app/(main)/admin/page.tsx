@@ -127,7 +127,14 @@ function AdminDashboard() {
     }
   };
 
-  const quickActions = [
+  const quickActions: {
+    title: string;
+    description: string;
+    onClick?: () => void;
+    href?: string;
+    icon: any;
+    color: string;
+  }[] = [
     {
       title: 'Add Member',
       description: 'Add a new team member',
