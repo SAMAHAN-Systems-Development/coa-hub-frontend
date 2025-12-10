@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 interface ProtectedRouteProps {
@@ -9,28 +7,16 @@ interface ProtectedRouteProps {
   requireAdmin?: boolean;
 }
 
+/**
+ * ProtectedRoute - UI wrapper only
+ * Middleware handles all redirects - this component only handles UI states
+ * DO NOT add router.push() here to avoid redirect loops
+ */
 export default function ProtectedRoute({
   children,
   requireAdmin = false
 }: ProtectedRouteProps) {
-  const router = useRouter();
   const { isAuthenticated, user, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading) {
-      // Not authenticated at all - redirect to login
-      if (!isAuthenticated) {
-        router.push('/login');
-        return;
-      }
-
-      // Requires admin but user is not admin
-      if (requireAdmin && !user?.isAdmin) {
-        router.push('/'); // Redirect to home if not admin
-        return;
-      }
-    }
-  }, [isAuthenticated, user, isLoading, requireAdmin, router]);
 
   // Show loading state while checking auth
   if (isLoading) {
@@ -41,7 +27,7 @@ export default function ProtectedRoute({
     );
   }
 
-  // Not authenticated
+  // Not authenticated - middleware will redirect, just show nothing
   if (!isAuthenticated) {
     return null;
   }

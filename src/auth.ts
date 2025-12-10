@@ -40,6 +40,7 @@ declare module "@auth/core/jwt" {
   }
 }
 
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
@@ -187,6 +188,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return token;
       }
 
+      // If there's already an error and no refresh token, don't try to refresh again
+      if (token.error === "RefreshAccessTokenError" && !token.refreshToken) {
+        return token; // Return token with error to prevent infinite refresh attempts
+      }
+
       // Access token has expired, try to refresh it
       return refreshAccessToken(token);
     },
@@ -207,6 +213,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.accessToken = token.accessToken as string | undefined;
       session.error = token.error as string | undefined;
 
+      // If there's an error and no access token, the session is invalid
+      // This will be handled by the middleware to redirect to login
+      if (token.error && !token.accessToken) {
+        return { ...session, error: "SessionExpired" };
+      }
+
       return session;
     },
   },
@@ -222,6 +234,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
 
   secret: process.env.NEXTAUTH_SECRET,
+  
+  // Enable trustHost to work behind proxies (Cloudflare Tunnel, etc.)
+  // This allows NextAuth to detect the correct URL from X-Forwarded-* headers
+  // When trustHost is true, NextAuth will use the request headers to determine the URL
+  // Make sure NEXTAUTH_URL is set to your public domain: https://www.roseltrading.trade
+  trustHost: true,
 });
 
 /**
@@ -238,9 +256,21 @@ async function refreshAccessToken(token: any) {
     return refreshPromise;
   }
 
+  // CRITICAL: Check for refresh token BEFORE attempting refresh
+  // If missing, return error state immediately to prevent infinite loops
+  if (!token.refreshToken) {
+    console.error("Attempting refresh with MISSING refresh token. Session expired.");
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+      accessToken: undefined, // Clear access token to force re-authentication
+      accessTokenExpires: undefined,
+    };
+  }
+
   refreshPromise = (async () => {
     try {
-      console.log("Attempting refresh with token:", token.refreshToken ? "present" : "MISSING");
+      console.log("Attempting refresh with token: present");
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
         method: "POST",
         headers: {
@@ -252,7 +282,13 @@ async function refreshAccessToken(token: any) {
       if (!response.ok) {
         const errorBody = await response.text();
         console.error("Refresh failed:", response.status, errorBody);
-        throw new Error(`Failed to refresh token: ${response.status}`);
+        // Return error state instead of throwing to prevent infinite loops
+        return {
+          ...token,
+          error: "RefreshAccessTokenError",
+          accessToken: undefined, // Invalidate access token
+          accessTokenExpires: undefined,
+        };
       }
 
       const data = await response.json();
@@ -262,12 +298,16 @@ async function refreshAccessToken(token: any) {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken || token.refreshToken,
         accessTokenExpires: Date.now() + (data.expiresIn || 3600) * 1000,
+        error: undefined, // Clear any previous errors
       };
     } catch (error) {
       console.error("Token refresh error:", error);
+      // Return error state instead of throwing to prevent infinite loops
       return {
         ...token,
         error: "RefreshAccessTokenError",
+        accessToken: undefined, // Invalidate access token
+        accessTokenExpires: undefined,
       };
     } finally {
       refreshPromise = null;

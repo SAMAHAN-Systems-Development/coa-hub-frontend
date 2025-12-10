@@ -2,8 +2,17 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 export default auth((req) => {
+  // Safety check: ensure req.url exists (can be null with Cloudflare Tunnel)
+  if (!req.url) {
+    return NextResponse.next();
+  }
+
   const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
+  
+  // Check if user is logged in AND has a valid session (no error, has access token)
+  const session = req.auth;
+  const hasValidSession = !!session && !session.error && !!session.accessToken;
+  const isLoggedIn = hasValidSession;
 
   // Public routes that don't require authentication
   const publicRoutes = ["/login"];
@@ -11,12 +20,13 @@ export default auth((req) => {
 
   // Redirect logged-in users away from login page
   if (isPublicRoute && isLoggedIn) {
-    const user = req.auth?.user;
+    const user = session?.user;
     const redirectUrl = user?.isAdmin ? "/admin" : "/";
+    // Use req.url which is guaranteed to exist at this point
     return NextResponse.redirect(new URL(redirectUrl, req.url));
   }
 
-  // Redirect non-logged-in users to login page
+  // Redirect non-logged-in users (or users with invalid sessions) to login page
   if (!isPublicRoute && !isLoggedIn) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
@@ -25,7 +35,7 @@ export default auth((req) => {
 
   // Admin routes - require admin role
   if (pathname.startsWith("/admin")) {
-    const user = req.auth?.user;
+    const user = session?.user;
     if (!user?.isAdmin) {
       return NextResponse.redirect(new URL("/", req.url));
     }
