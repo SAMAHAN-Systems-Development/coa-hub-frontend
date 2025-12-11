@@ -16,7 +16,7 @@ import { Plus } from "lucide-react";
 import { SharedButton } from "@/components/shared/SharedButton";
 import ActionModal from "@/components/features/action_modal";
 import ImageUploadField from "@/components/announcements/ImageUploadField";
-import { useCreateAnnouncementMutation } from "@/lib/api/mutations/announcement.mutation";
+import { useCreateAnnouncementWithImagesMutation } from "@/lib/api/mutations/announcement.mutation";
 import {
   AnnouncementFormSchema,
   AnnouncementFormData,
@@ -34,7 +34,7 @@ export default function CreateAnnouncementModal({
   onSuccess,
 }: CreateAnnouncementModalProps) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const createMutation = useCreateAnnouncementMutation();
+  const createMutation = useCreateAnnouncementWithImagesMutation();
 
   const {
     register,
@@ -62,8 +62,7 @@ export default function CreateAnnouncementModal({
       await createMutation.mutateAsync({
         title: formData.subject,
         description: formData.body,
-        // TODO: Add image upload when file storage is implemented
-        images: [],
+        images: formData.images.length > 0 ? formData.images : undefined,
       });
       reset();
       onSuccess?.();

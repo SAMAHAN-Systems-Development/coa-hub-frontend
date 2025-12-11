@@ -28,12 +28,60 @@ export function useCreateMemberMutation() {
   });
 }
 
+/** Create member with image upload */
+export function useCreateMemberWithImageMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { name: string; position: string; email: string; categoryId: number; image?: File }) =>
+      membersApi.createWithImage(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["members"] });
+      toast.success("Member created successfully");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        const apiError = error as { data?: { message?: string } };
+        const errorMessage = apiError.data?.message || error.message;
+        toast.error(`Failed to create member: ${errorMessage}`);
+        console.error("API Error:", error);
+      } else {
+        toast.error("Failed to create member");
+      }
+    },
+  });
+}
+
 export function useUpdateMemberMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateMemberRequest }) =>
       membersApi.update(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["members"] });
+      queryClient.invalidateQueries({ queryKey: ["members", variables.id] });
+      toast.success("Member updated successfully");
+    },
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        const apiError = error as { data?: { message?: string } };
+        const errorMessage = apiError.data?.message || error.message;
+        toast.error(`Failed to update member: ${errorMessage}`);
+      } else {
+        toast.error("Failed to update member");
+      }
+    },
+  });
+}
+
+/** Update member with image upload */
+export function useUpdateMemberWithImageMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; position?: string; email?: string; categoryId?: number; image?: File } }) =>
+      membersApi.updateWithImage(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["members"] });
       queryClient.invalidateQueries({ queryKey: ["members", variables.id] });

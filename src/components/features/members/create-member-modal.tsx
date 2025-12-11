@@ -6,11 +6,12 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import ActionModal from "@/components/features/action_modal";
 import { useCategoriesQuery } from "@/lib/api/queries/categoriesQueries";
+import InputImage from "@/components/members-page/input-image";
 
 interface CreateMemberModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: { name: string; position: string; email: string; categoryId: number }) => void;
+  onSave: (data: { name: string; position: string; email: string; categoryId: number; image?: File }) => void;
 }
 
 export default function CreateMemberModal({
@@ -22,6 +23,7 @@ export default function CreateMemberModal({
   const [position, setPosition] = useState("");
   const [email, setEmail] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
+  const [image, setImage] = useState<File | null>(null);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -38,6 +40,7 @@ export default function CreateMemberModal({
       position: position.trim(),
       email: email.trim(),
       categoryId: parseInt(categoryId, 10),
+      image: image || undefined,
     });
 
     resetForm();
@@ -50,6 +53,7 @@ export default function CreateMemberModal({
     setPosition("");
     setEmail("");
     setCategoryId("");
+    setImage(null);
   }
 
   return (
@@ -148,6 +152,19 @@ export default function CreateMemberModal({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* PHOTO */}
+            <div
+              className="rounded-2xl p-6 shadow-[0px_20px_60px_-20px_rgba(0,0,0,0.35)] flex flex-col gap-3"
+              style={{
+                background: "linear-gradient(90deg, rgba(120,125,133,0.65), rgba(55,60,68,0.90))",
+              }}
+            >
+              <label className="text-white text-base md:text-xl font-medium">Photo (optional)</label>
+              <InputImage
+                onImageChange={(file) => setImage(file)}
+              />
             </div>
           </div>
 

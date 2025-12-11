@@ -14,7 +14,7 @@ import CreateAnnouncementModal from '@/components/announcements/CreateAnnounceme
 import { useCreateSubmissionBinMutation } from '@/lib/api/mutations/submission-bins.mutation';
 import { useCreateDeadlineMutation } from '@/lib/api/mutations/deadline.mutation';
 import { useCreateTemplateMutation } from '@/lib/api/mutations/template.mutation';
-import { useCreateMemberMutation } from '@/lib/api/mutations/membersMutations';
+import { useCreateMemberWithImageMutation } from '@/lib/api/mutations/membersMutations';
 import { useCreateCategoryMutation } from '@/lib/api/mutations/categoriesMutations';
 import { toastSuccess, toastError } from '@/components/shared/toast';
 
@@ -38,7 +38,7 @@ function AdminDashboard() {
   const createSubmissionBin = useCreateSubmissionBinMutation();
   const createDeadline = useCreateDeadlineMutation();
   const createTemplate = useCreateTemplateMutation();
-  const createMember = useCreateMemberMutation();
+  const createMember = useCreateMemberWithImageMutation();
   const createCategory = useCreateCategoryMutation();
 
   const handleAddSubmissionBin = async (data: { name: string; fileFormat: string; fileName: string }) => {
@@ -102,13 +102,14 @@ function AdminDashboard() {
     }
   };
 
-  const handleAddMember = async (data: { name: string; position: string; email: string; categoryId: number }) => {
+  const handleAddMember = async (data: { name: string; position: string; email: string; categoryId: number; image?: File }) => {
     try {
       await createMember.mutateAsync({
         name: data.name,
         position: data.position,
         email: data.email,
         categoryId: data.categoryId,
+        image: data.image,
       });
       setShowMemberModal(false);
     } catch (err) {

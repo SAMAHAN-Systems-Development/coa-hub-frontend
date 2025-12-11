@@ -79,6 +79,66 @@ export async function apiFetch<T = unknown>(
   return response.text() as T;
 }
 
+/**
+ * Upload files via FormData (multipart/form-data)
+ * Don't set Content-Type - browser will set it with boundary
+ */
+export async function apiUpload<T = unknown>(
+  endpoint: string,
+  formData: FormData,
+  options: Omit<FetchOptions, "body"> = {}
+): Promise<T> {
+  const { requiresAuth = true, ...fetchOptions } = options;
+
+  const url = endpoint.startsWith("http") ? endpoint : `${API_URL}${endpoint}`;
+
+  // Prepare headers - DON'T set Content-Type for FormData
+  const headers = new Headers(fetchOptions.headers);
+
+  // Add auth token if required
+  if (requiresAuth) {
+    const session = await getSession();
+    if (session?.accessToken) {
+      headers.set("Authorization", `Bearer ${session.accessToken}`);
+    }
+  }
+
+  // Make the request
+  const response = await fetch(url, {
+    ...fetchOptions,
+    method: fetchOptions.method || "POST",
+    headers,
+    body: formData,
+  });
+
+  // Handle 401 - session expired
+  if (response.status === 401 && requiresAuth) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new ApiError(401, "Unauthorized", { message: "Session expired" });
+  }
+
+  // Handle non-OK responses
+  if (!response.ok) {
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      errorData = { message: response.statusText };
+    }
+    throw new ApiError(response.status, response.statusText, errorData);
+  }
+
+  // Parse response
+  const contentType = response.headers.get("Content-Type");
+  if (contentType?.includes("application/json")) {
+    return response.json();
+  }
+
+  return response.text() as T;
+}
+
 // Convenience methods
 export const api = {
   get: <T = unknown>(endpoint: string, options?: FetchOptions) =>
@@ -119,4 +179,18 @@ export const api = {
 
   delete: <T = unknown>(endpoint: string, options?: FetchOptions) =>
     apiFetch<T>(endpoint, { ...options, method: "DELETE" }),
+
+  /** Upload files via FormData */
+  upload: <T = unknown>(
+    endpoint: string,
+    formData: FormData,
+    options?: Omit<FetchOptions, "body">
+  ) => apiUpload<T>(endpoint, formData, options),
+
+  /** Upload files via FormData with PATCH method */
+  uploadPatch: <T = unknown>(
+    endpoint: string,
+    formData: FormData,
+    options?: Omit<FetchOptions, "body">
+  ) => apiUpload<T>(endpoint, formData, { ...options, method: "PATCH" }),
 };
