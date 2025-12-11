@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
+
+  const hasRefreshError = req.auth?.error === "RefreshAccessTokenError";
+  const isLoggedIn = !!req.auth && !hasRefreshError;
 
   // Public routes that don't require authentication
   const publicRoutes = ["/login"];
@@ -16,7 +18,7 @@ export default auth((req) => {
     return NextResponse.redirect(new URL(redirectUrl, req.url));
   }
 
-  // Redirect non-logged-in users to login page
+  // Redirect non-logged-in users (or users with refresh errors) to login page
   if (!isPublicRoute && !isLoggedIn) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);

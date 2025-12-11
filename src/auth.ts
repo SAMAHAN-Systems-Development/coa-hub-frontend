@@ -260,8 +260,7 @@ async function refreshAccessToken(token: any) {
       return {
         ...token,
         accessToken: data.accessToken,
-        refreshToken: data.refreshToken || token.refreshToken,
-        accessTokenExpires: Date.now() + (data.expiresIn || 3600) * 1000,
+        accessTokenExpires: Date.now() + (data.expiresIn || 900) * 1000,
       };
     } catch (error) {
       console.error("Token refresh error:", error);
