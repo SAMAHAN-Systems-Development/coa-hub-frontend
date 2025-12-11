@@ -32,10 +32,13 @@ export default function MembersPage() {
         <HeroContainer title={"MEMBERS"} />
         <PageContainer>
           <ContentContainer>
-            <EmptyState
-              title="Error loading members"
-              description="Failed to load members. Please try again."
-            />
+            <div className="flex w-full items-center justify-center py-16">
+              <EmptyState
+                title="Error loading members"
+                description="Failed to load members. Please try again."
+                className="mx-auto"
+              />
+            </div>
           </ContentContainer>
         </PageContainer>
       </>
@@ -70,21 +73,25 @@ export default function MembersPage() {
                       </CardContainer>
                     ))
                   ) : (
-                    <EmptyState
-                      title="No members"
-                      description="No members in this category yet."
-                      className="mx-auto"
-                    />
+                    <div className="flex w-full items-center justify-center py-16">
+                      <EmptyState
+                        title="No members"
+                        description="No members in this category yet."
+                        className="mx-auto"
+                      />
+                    </div>
                   )}
                 </SectionContainer>
               </div>
             ))
           ) : (
-            <EmptyState
-              title="No categories"
-              description="No member categories found."
-              className="mx-auto"
-            />
+            <div className="flex w-full items-center justify-center py-16">
+              <EmptyState
+                title="No categories"
+                description="No member categories found."
+                className="mx-auto"
+              />
+            </div>
           )}
         </ContentContainer>
       </PageContainer>
