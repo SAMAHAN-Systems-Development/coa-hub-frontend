@@ -154,7 +154,7 @@ export default function DeadlinesPage() {
     };
 
     return (
-        <section>
+        <section className="mx-5 lg:mx-0">
             <HeaderContainer
                 title="DEADLINES"
                 actions={isAdmin ? (
