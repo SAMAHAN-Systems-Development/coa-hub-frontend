@@ -366,7 +366,9 @@ export default function SubmissionBinFolder() {
                     <div
                       key={folder.id}
                       onClick={handleCardClick}
-                      className={`group relative w-full bg-gradient-to-r from-[#49515A] to-[#373C44] text-white text-sm md:text-lg p-6 rounded-lg shadow hover:brightness-110 transition-all cursor-pointer ${!isSingleColumn && isLast && isOdd ? "md:col-span-2 md:w-1/2 md:mx-auto" : ""}`}
+                      className={`group relative w-full bg-gradient-to-r from-[#49515A] to-[#373C44] text-white text-sm md:text-lg p-6 rounded-lg shadow hover:brightness-110 transition-all cursor-pointer 
+                        ${!isAdmin ? "py-10" : "" }
+                        ${!isSingleColumn && isLast && isOdd ? "md:col-span-2 md:w-1/2 md:mx-auto" : ""}`}
                     >
                       {/* Centered label */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none font-montserrat">
