@@ -82,11 +82,13 @@ function RoleSection({
               />
             ))
           ) : (
-            <EmptyState
-              title={`No announcements from the ${role} yet`}
-              description="Check back later for updates."
-              size="sm"
-            />
+            <div className="flex w-full items-center justify-center py-16">
+              <EmptyState
+                title={`No announcements from the ${role} yet`}
+                description="Check back later for updates."
+                size="sm"
+              />
+            </div>
           )}
         </div>
       </div>
@@ -186,26 +188,9 @@ export default function AnnouncementsPage() {
     <ProtectedRoute>
       <HeroContainer title="ANNOUNCEMENTS" />
       <PageContainer>
-        <ContentContainer>
-          {/* Main Header with Add Button */}
-          <HeaderContainer
-            title="ALL ANNOUNCEMENTS"
-            actions={isAdmin ? (
-              <SharedButton
-                onClick={() => setShowCreateModal(true)}
-                variant="primary"
-                tone="glass"
-                size="md"
-                rounded="md"
-                className="text-sm font-light hover:scale-[1.02]"
-              >
-                Add Announcement
-              </SharedButton>
-            ) : undefined}
-          />
-
+        <ContentContainer>  
           {/* Dynamic role sections */}
-          <div className="mt-6 px-8">
+          <div className="mx-5 lg:mx-0 mt-6 px-8">
           {roles.length > 0 ? (
             roles.map((role) => (
               <RoleSection
@@ -220,10 +205,13 @@ export default function AnnouncementsPage() {
               />
             ))
           ) : (
-            <EmptyState
-              title="No Announcements Yet"
-              description="Check back later for updates and announcements."
-            />
+            <div className="flex w-full items-center justify-center py-16">
+              <EmptyState
+                title="No Announcements Yet"
+                description="Check back later for updates and announcements."
+                className="mx-auto"
+              />
+            </div>
           )}
           </div>
         </ContentContainer>

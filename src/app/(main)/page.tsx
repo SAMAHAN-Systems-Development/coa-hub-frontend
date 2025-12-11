@@ -17,7 +17,7 @@ export default function Home() {
             <PageContainer>
                 <ContentContainer>
                     {/* Announcements Section */}
-                    <section>
+                    <section className="mx-5 lg:mx-0">
                         <HeaderContainer title="ANNOUNCEMENTS" />
                         <div className="mt-6 px-8">
                             <AnnouncementsCarousel />
@@ -25,7 +25,7 @@ export default function Home() {
                     </section>
 
                     {/* Description Section */}
-                    <section className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 shadow-md">
+                    <section className="mx-5 lg:mx-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 shadow-md">
                         <div className="max-w-4xl mx-auto text-center space-y-4">
                             <h2 className="text-3xl md:text-4xl font-bebas-neue text-gray-900">
                                 Welcome to the Commission on Audit&apos;s Submission Hub!
@@ -44,7 +44,7 @@ export default function Home() {
                     </section>
 
                     {/* Submission Bins Section */}
-                    <section>
+                    <section className="mx-5 lg:mx-0">
                         <HeaderContainer title="SUBMISSION BINS" />
                         <div className="mt-6 px-8">
                             <SubmissionBinsGrid />
