@@ -3,6 +3,7 @@ import { Montserrat, Bebas_Neue } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { SessionProvider } from "@/providers/SessionProvider";
+import { BackendHealthCheck } from "@/providers/BackendHealthCheck";
 import { Toaster } from "@/components/ui/sonner";
 
 const montserrat = Montserrat({
@@ -30,8 +31,10 @@ export default function RootLayout({
       <body>
         <SessionProvider>
           <QueryProvider>
-            {children}
-            <Toaster />
+            <BackendHealthCheck>
+              {children}
+              <Toaster />
+            </BackendHealthCheck>
           </QueryProvider>
         </SessionProvider>
       </body>
