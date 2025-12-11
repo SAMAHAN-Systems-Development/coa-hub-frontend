@@ -346,7 +346,7 @@ export default function SubmissionBinFolder() {
           {/* Folder buttons with admin controls */}
           {filteredFolders.length > 0 ? (
             <div
-              className={`grid gap-4 font-montserrat ${isSingleColumn ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"}`}
+              className={`grid gap-4 mx-10 lg:mx-0 font-montserrat ${isSingleColumn ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"}`}
             >
               {filteredFolders.map(
                 (folder: SubmissionBinFolderType, index: number) => {
