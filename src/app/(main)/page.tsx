@@ -8,7 +8,9 @@ import HeaderContainer from "@/components/layout/HeaderContainer";
 
 import { AnnouncementsCarousel, SubmissionBinsGrid } from "@/components/features/home";
 import DeadlinesPage from "@/components/features/deadlines_page/deadlines";
+import CuartaPresentationsSection from "@/components/features/cuarta_presentations/cuarta-presentations";
 import TemplatesPage from "@/components/features/templates_page/templates";
+import ReportsFlowDiagram from "@/components/features/reports-flow/reports-flow-diagram";
 
 export default function Home() {
     return (
@@ -53,11 +55,17 @@ export default function Home() {
 
                     {/* Deadlines Section */}
                     <DeadlinesPage />
+
+                    {/* Cuarta Presentations Section */}
+                    <CuartaPresentationsSection />
                 </ContentContainer>
             </PageContainer>
 
             {/* Templates Section */}
             <TemplatesPage />
+
+            {/* Reports Flow Diagram */}
+            <ReportsFlowDiagram />
         </ProtectedRoute>
     );
 }
