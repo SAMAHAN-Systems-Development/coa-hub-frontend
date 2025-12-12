@@ -2,6 +2,8 @@ import React from "react";
 import Image from "next/image";
 import { Pencil, Trash2 } from "lucide-react";
 
+export type AdminAction = "edit" | "delete" | null;
+
 export interface CardContainerProps {
   children: React.ReactNode;
   className?: string;
