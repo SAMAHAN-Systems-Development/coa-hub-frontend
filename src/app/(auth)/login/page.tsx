@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
 import { Suspense } from "react";
+import { assetUrl } from "@/lib/asset-url";
 
 const GoogleIcon = () => (
   <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
@@ -106,7 +107,7 @@ function LoginPage() {
         <div className="flex flex-col items-center mb-12">
           <div className="mb-6">
             <Image
-              src="/logo-dark.svg"
+              src={assetUrl("/logo-dark.svg")}
               alt="COA Logo"
               width={120}
               height={120}

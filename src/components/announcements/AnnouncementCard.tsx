@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { assetUrl } from "@/lib/asset-url";
 
 interface Announcement {
   id: string;
@@ -92,12 +93,12 @@ export default function AnnouncementCard({
         <div className="flex items-center gap-3 sm:gap-4 flex-1">
           <Avatar className="h-12 w-12 sm:h-14 sm:w-14 bg-gray-600">
             <AvatarImage
-              src={announcement.author.avatar || "/assets/images/logo-dark.png"}
+              src={announcement.author.avatar || assetUrl("/assets/images/logo-dark.png")}
               alt={announcement.author.name}
             />
             <AvatarFallback className="bg-gray-600 text-white text-base sm:text-lg font-medium">
               <img
-                src="/assets/images/logo-dark.png"
+                src={assetUrl("/assets/images/logo-dark.png")}
                 alt="COA Logo"
                 className="w-full h-full object-contain p-1"
               />

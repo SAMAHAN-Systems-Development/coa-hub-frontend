@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { assetUrl } from "@/lib/asset-url";
 import { useEffect, useState } from "react";
 
 export interface FullScreenLoaderProps {
@@ -58,7 +59,7 @@ export const FullScreenLoader = ({
         <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 xl:w-40 xl:h-40 flex items-center justify-center">
           {/* Base Light Logo */}
           <img
-            src="/logo-light.svg"
+            src={assetUrl("/logo-light.svg")}
             alt="Loading Light Logo"
             className="absolute inset-0 w-full h-full"
             style={{
@@ -89,7 +90,7 @@ export const FullScreenLoader = ({
             }}
           >
             <img
-              src="/logo-dark.svg"
+              src={assetUrl("/logo-dark.svg")}
               alt="Loading Dark Logo"
               className="w-full h-full"
               style={{

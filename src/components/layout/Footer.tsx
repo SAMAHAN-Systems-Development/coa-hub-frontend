@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { LuFacebook, LuTwitter } from "react-icons/lu";
+import { assetUrl } from "@/lib/asset-url";
 
 export default function Footer() {
   return (
@@ -11,7 +12,7 @@ export default function Footer() {
           {/* mobile logo */}
           <div className="block md:hidden mb-4 w-full flex justify-center">
             <img
-              src="/assets/images/footer-logo.png"
+              src={assetUrl("/assets/images/footer-logo.png")}
               alt="COA Footer Logo"
               className="w-32 h-auto"
             />
@@ -85,7 +86,7 @@ export default function Footer() {
         {/* desktop logo on right */}
         <div className="hidden md:flex mt-8 md:mt-0 justify-center items-center w-full md:w-auto order-1 md:order-2">
           <img
-            src="/assets/images/footer-logo.png"
+            src={assetUrl("/assets/images/footer-logo.png")}
             alt="COA Footer Logo"
             className="w-64 h-auto"
           />

@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import { FaUserCircle } from "react-icons/fa";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useSubmissionBinsQuery } from "@/lib/api/queries/use-submission-bins";
+import { assetUrl } from "@/lib/asset-url";
 
 const navFont = { fontFamily: "'Bebas Neue', sans-serif" };
 
@@ -60,7 +61,7 @@ const Navbar = () => {
       className="w-full shadow-sm relative"
       style={{
         ...navFont,
-        backgroundImage: "url('/assets/images/header-bg.png')",
+        backgroundImage: `url('${assetUrl("/assets/images/header-bg.png")}')`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
@@ -71,7 +72,7 @@ const Navbar = () => {
         {/* logo */}
         <div className="flex items-center gap-4 flex-shrink-0">
           <img
-            src="/assets/images/logo-dark.png"
+            src={assetUrl("/assets/images/logo-dark.png")}
             alt="COA Logo"
             className="w-12 h-12 rounded-full"
           />
