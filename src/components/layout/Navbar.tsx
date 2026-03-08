@@ -7,6 +7,7 @@ import { FaUserCircle } from "react-icons/fa";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useSubmissionBinsQuery } from "@/lib/api/queries/use-submission-bins";
 import { assetUrl } from "@/lib/asset-url";
+import { withBasePath } from "@/lib/route-url";
 
 const navFont = { fontFamily: "'Bebas Neue', sans-serif" };
 
@@ -52,7 +53,7 @@ const Navbar = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
+    await signOut({ callbackUrl: withBasePath("/") });
   };
 
   return (

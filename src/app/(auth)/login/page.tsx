@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
 import { Suspense } from "react";
 import { assetUrl } from "@/lib/asset-url";
+import { stripBasePath, withBasePath } from "@/lib/route-url";
 
 const GoogleIcon = () => (
   <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
@@ -49,10 +50,11 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || withBasePath("/");
+  const callbackRoute = stripBasePath(callbackUrl);
 
   // Show admin login option only when accessing from /admin routes
-  const isAdminLogin = callbackUrl.startsWith("/admin");
+  const isAdminLogin = callbackRoute.startsWith("/admin");
 
   const [loginMode, setLoginMode] = useState<"select" | "google" | "admin">(
     isAdminLogin ? "select" : "google"

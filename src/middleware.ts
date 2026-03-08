@@ -1,8 +1,9 @@
 import { auth } from "@/auth";
+import { stripBasePath, withBasePath } from "@/lib/route-url";
 import { NextResponse } from "next/server";
 
 export default auth((req) => {
-  const { pathname } = req.nextUrl;
+  const pathname = stripBasePath(req.nextUrl.pathname);
 
   const hasRefreshError = req.auth?.error === "RefreshAccessTokenError";
   const isLoggedIn = !!req.auth && !hasRefreshError;
@@ -14,14 +15,14 @@ export default auth((req) => {
   // Redirect logged-in users away from login page
   if (isPublicRoute && isLoggedIn) {
     const user = req.auth?.user;
-    const redirectUrl = user?.isAdmin ? "/admin" : "/";
+    const redirectUrl = user?.isAdmin ? withBasePath("/admin") : withBasePath("/");
     return NextResponse.redirect(new URL(redirectUrl, req.url));
   }
 
   // Redirect non-logged-in users (or users with refresh errors) to login page
   if (!isPublicRoute && !isLoggedIn) {
-    const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+    const loginUrl = new URL(withBasePath("/login"), req.url);
+    loginUrl.searchParams.set("callbackUrl", `${req.nextUrl.pathname}${req.nextUrl.search}`);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -29,7 +30,7 @@ export default auth((req) => {
   if (pathname.startsWith("/admin")) {
     const user = req.auth?.user;
     if (!user?.isAdmin) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL(withBasePath("/"), req.url));
     }
   }
 

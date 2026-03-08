@@ -1,4 +1,5 @@
 import { getSession } from "next-auth/react";
+import { withBasePath } from "@/lib/route-url";
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -54,7 +55,7 @@ export async function apiFetch<T = unknown>(
     // NextAuth handles token refresh automatically
     // If we get 401, it means the session is truly expired
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      window.location.href = withBasePath("/login");
     }
     throw new ApiError(401, "Unauthorized", { message: "Session expired" });
   }
@@ -114,7 +115,7 @@ export async function apiUpload<T = unknown>(
   // Handle 401 - session expired
   if (response.status === 401 && requiresAuth) {
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      window.location.href = withBasePath("/login");
     }
     throw new ApiError(401, "Unauthorized", { message: "Session expired" });
   }

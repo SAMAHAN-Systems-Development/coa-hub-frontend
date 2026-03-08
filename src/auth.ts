@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
+import { withBasePath } from "@/lib/route-url";
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -212,8 +213,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
 
   pages: {
-    signIn: "/login",
-    error: "/login",
+    signIn: withBasePath("/login"),
+    error: withBasePath("/login"),
   },
 
   session: {
