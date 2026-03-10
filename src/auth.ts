@@ -43,7 +43,7 @@ declare module "@auth/core/jwt" {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // Ensure NextAuth endpoints respect Next.js basePath
-  basePath: withBasePath("/api/auth"),
+  basePath: "/api/auth",
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
