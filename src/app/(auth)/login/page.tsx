@@ -66,7 +66,7 @@ function LoginPage() {
       await signIn("google", {
         callbackUrl,
         redirect: true,
-        basePath: "/coahub/api/auth",
+        basePath: withBasePath("/api/auth"),
       });
     } catch (error) {
       console.error("Google sign in error:", error);

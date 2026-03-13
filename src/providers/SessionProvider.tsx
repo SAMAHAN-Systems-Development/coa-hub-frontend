@@ -2,6 +2,7 @@
 
 import { SessionProvider as NextAuthSessionProvider } from "next-auth/react";
 import type { Session } from "next-auth";
+import { withBasePath } from "@/lib/route-url";
 
 export function SessionProvider({
   children,
@@ -12,6 +13,7 @@ export function SessionProvider({
 }) {
   return (
     <NextAuthSessionProvider
+      basePath={withBasePath("/api/auth")}
       session={session}
       // Refetch session every 5 minutes (instead of constantly)
       refetchInterval={5 * 60}

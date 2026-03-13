@@ -1,8 +1,8 @@
-const RAW_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const RAW_BASE_PATH: string = "/coahub";
 
 export const BASE_PATH =
   RAW_BASE_PATH && RAW_BASE_PATH !== "/"
-    ? `/${RAW_BASE_PATH.replace(/^\/+|\/+$/g, "")}`
+    ? `/${RAW_BASE_PATH.replace(/^\/+|\/+$/g, "")}` 
     : "";
 
 function isAbsoluteUrl(path: string): boolean {

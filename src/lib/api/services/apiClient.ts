@@ -1,8 +1,10 @@
 import { getSession } from "next-auth/react";
 import { withBasePath } from "@/lib/route-url";
 
+// TEMP: hard-code API base to validate production calls.
+// Revert to env-based value after verification.
 export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  "https://samahan.addu.edu.ph/coahub/api";
 
 export class ApiError extends Error {
   constructor(
